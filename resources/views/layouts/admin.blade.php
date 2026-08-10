@@ -26,10 +26,10 @@
         <!-- Sidebar -->
         <aside
             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
-            class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0a2219] text-white shadow-xl flex flex-col justify-between border-r border-[#153a2b] flex-shrink-0 transition-transform duration-300 lg:static lg:translate-x-0">
-            <div>
-                <!-- Brand Header -->
-                <div class="p-5 border-b border-[#153a2b] bg-[#071912] flex items-center space-x-3">
+            class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0a2219] text-white shadow-xl flex flex-col border-r border-[#153a2b] flex-shrink-0 transition-transform duration-300 lg:static lg:translate-x-0">
+            
+            <!-- Brand Header -->
+            <div class="p-5 border-b border-[#153a2b] bg-[#071912] flex items-center space-x-3 flex-shrink-0">
                     <div
                         class="w-10 h-10 bg-gradient-to-br from-[#f3e7c4] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md border border-white/10 flex-shrink-0">
                         <svg class="w-6 h-6 text-[#0a2219]" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -45,7 +45,7 @@
                 </div>
 
                 <!-- Navigation -->
-                <nav class="mt-6 space-y-1.5 px-3">
+                <nav class="mt-6 space-y-1.5 px-3 flex-1 overflow-y-auto pb-6">
                     <!-- Dashboard -->
                     <a href="{{ route('admin.dashboard') }}"
                         class="flex items-center px-4 py-2.5 rounded-xl transition duration-150 text-sm font-semibold {{ request()->routeIs('admin.dashboard') ? 'sidebar-active' : 'text-gray-300 hover:bg-[#123b2c] hover:text-white' }}">
@@ -159,10 +159,9 @@
                         Pengaturan
                     </a> --}}
                 </nav>
-            </div>
 
             <!-- User Info & Logout -->
-            <div class="p-4 border-t border-[#153a2b] bg-[#071912]">
+            <div class="p-4 border-t border-[#153a2b] bg-[#071912] flex-shrink-0">
                 <div class="flex items-center justify-between">
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-white truncate">{{ auth()->user()->name }}</p>
