@@ -25,7 +25,8 @@ class AttendanceController extends Controller
             ->whereDate('date', $today)
             ->first();
 
-        $office = CompanyLocation::first();
+        $office = CompanyLocation::where('name', 'like', '%' . $employee->department . '%')->first() 
+            ?? CompanyLocation::first();
 
         return view('employee.attendance.index', [
             'employee' => $employee,

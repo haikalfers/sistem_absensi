@@ -40,7 +40,7 @@ class AttendanceService
 
             // Validasi GPS untuk PWA (Driyorejo)
             if ($source === 'pwa') {
-                $office = CompanyLocation::first();
+                $office = CompanyLocation::where('name', 'like', '%' . $employee->department . '%')->first();
 
                 if (!$office) {
                     return [
