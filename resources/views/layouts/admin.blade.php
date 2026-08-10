@@ -18,11 +18,15 @@
 </head>
 
 <body class="bg-[#f7f9f7] font-sans antialiased text-gray-800">
-    <div class="flex h-screen overflow-hidden">
+    <div x-data="{ sidebarOpen: false }" class="flex h-screen overflow-hidden relative">
+        
+        <!-- Mobile sidebar backdrop -->
+        <div x-show="sidebarOpen" x-transition.opacity class="fixed inset-0 z-40 bg-gray-900/80 lg:hidden" @click="sidebarOpen = false" style="display: none;"></div>
 
         <!-- Sidebar -->
         <aside
-            class="w-64 bg-[#0a2219] text-white shadow-xl flex flex-col justify-between border-r border-[#153a2b] flex-shrink-0">
+            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+            class="fixed inset-y-0 left-0 z-50 w-64 bg-[#0a2219] text-white shadow-xl flex flex-col justify-between border-r border-[#153a2b] flex-shrink-0 transition-transform duration-300 lg:static lg:translate-x-0">
             <div>
                 <!-- Brand Header -->
                 <div class="p-5 border-b border-[#153a2b] bg-[#071912] flex items-center space-x-3">
@@ -180,22 +184,28 @@
         </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 flex flex-col overflow-hidden">
+        <div class="flex-1 flex flex-col overflow-hidden relative z-0">
             <!-- Navbar -->
-            <header class="bg-white border-b border-gray-100 shadow-sm flex-shrink-0">
-                <div class="px-6 py-4 flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <h2 class="text-lg font-bold text-[#0a2219]">@yield('page-title', 'Dashboard')</h2>
+            <header class="bg-white border-b border-gray-100 shadow-sm flex-shrink-0 relative z-10">
+                <div class="px-4 sm:px-6 py-4 flex items-center justify-between">
+                    <div class="flex items-center space-x-2 sm:space-x-3 overflow-hidden">
+                        <button @click="sidebarOpen = true" class="text-gray-500 focus:outline-none lg:hidden hover:text-[#0a2219] flex-shrink-0">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </button>
+                        <h2 class="text-base sm:text-lg font-bold text-[#0a2219] truncate">@yield('page-title', 'Dashboard')</h2>
                     </div>
                     <div class="flex items-center space-x-4">
                         <div
-                            class="flex items-center space-x-1.5 bg-[#f0f4f2] text-[#0a2219] px-3 py-1.5 rounded-lg text-xs font-bold border border-[#d2dfd8]">
-                            <svg class="w-4 h-4 text-[#0a2219]" fill="none" stroke="currentColor"
+                            class="flex items-center space-x-1.5 bg-[#f0f4f2] text-[#0a2219] px-2 sm:px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-bold border border-[#d2dfd8] flex-shrink-0">
+                            <svg class="w-3 h-3 sm:w-4 sm:h-4 text-[#0a2219]" fill="none" stroke="currentColor"
                                 viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                             </svg>
-                            <span>{{ now()->format('d M Y, H:i') }} WIB</span>
+                            <span class="hidden sm:inline">{{ now()->format('d M Y, H:i') }} WIB</span>
+                            <span class="sm:hidden">{{ now()->format('d M y, H:i') }}</span>
                         </div>
                     </div>
                 </div>
