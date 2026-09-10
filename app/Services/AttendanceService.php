@@ -54,8 +54,7 @@ class AttendanceService
             // Validasi GPS Radius (hanya untuk PWA)
             $office = null;
             if ($source === 'pwa') {
-                $office = CompanyLocation::where('name', 'like', '%' . $employee->department . '%')->first()
-                    ?? CompanyLocation::first();
+                $office = CompanyLocation::first();
 
                 if (!$office) {
                     return [

@@ -2,6 +2,27 @@
 
 @section('title', 'Absensi')
 
+@section('css')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #attendance-map {
+        height: 220px;
+        width: 100%;
+        border-radius: 0.75rem;
+        z-index: 1;
+    }
+    .custom-div-icon, .custom-user-icon {
+        background: none;
+        border: none;
+    }
+    .leaflet-popup-content-wrapper {
+        border-radius: 0.75rem;
+        font-family: inherit;
+        font-size: 11px;
+    }
+</style>
+@endsection
+
 @section('content')
     {{-- Status Waktu Server --}}
     <div class="bg-gradient-to-br from-[#0a2219] to-[#123b2c] text-white rounded-2xl p-6 mb-5 border border-[#1d523e] shadow-sm flex flex-col items-center text-center">
@@ -10,17 +31,28 @@
         <p class="text-[10px] text-gray-300 font-bold uppercase tracking-widest mt-1">WIB (Waktu Indonesia Barat)</p>
     </div>
 
-    {{-- GPS Status --}}
+    {{-- GPS Status & Peta Interaktif --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-5">
-        <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-4">Lokasi Absensi (GPS)</h3>
-        <div id="location-status" class="text-center py-3">
-            <div class="animate-spin inline-block w-6 h-6 border-2 border-[#d4af37] border-t-transparent rounded-full mb-2"></div>
-            <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Mendeteksi koordinat GPS...</p>
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Lokasi Absensi (GPS Map)</h3>
+            <div id="distance-badge" class="hidden">
+                <span id="radius-status-pill" class="px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider">
+                    Mengecek Radius...
+                </span>
+            </div>
+        </div>
+
+        {{-- Leaflet Map Container --}}
+        <div id="attendance-map" class="mb-3 border border-gray-100 shadow-inner"></div>
+
+        <div id="location-status" class="text-center py-1">
+            <div class="animate-spin inline-block w-5 h-5 border-2 border-[#d4af37] border-t-transparent rounded-full mb-1"></div>
+            <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Mendeteksi lokasi GPS Anda...</p>
         </div>
         @if ($office)
-            <div class="border-t border-gray-50 pt-4 flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-wider">
-                <span>Zona Radius Kantor:</span>
-                <span class="text-[#0a2219] bg-[#e7f0ec] px-2.5 py-1 rounded-lg border border-[#d2dfd8]">{{ $office->radius_meters }} Meter</span>
+            <div class="border-t border-gray-50 pt-3 flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                <span>Acuan Kantor: <strong class="text-gray-700">{{ $office->name }}</strong></span>
+                <span class="text-[#0a2219] bg-[#e7f0ec] px-2.5 py-1 rounded-lg border border-[#d2dfd8]">Radius {{ $office->radius_meters }}m</span>
             </div>
         @endif
     </div>
@@ -161,15 +193,28 @@
 @endsection
 
 @section('js')
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     // ============================================================
-    // STATE
+    // STATE & OFFICE DATA
     // ============================================================
+    const officeData = {
+        name: @json($office?->name ?? 'Kantor PT. Indobismar'),
+        lat: {{ $office?->latitude ?? -7.3193 }},
+        lng: {{ $office?->longitude ?? 112.7483 }},
+        radius: {{ $office?->radius_meters ?? 50 }}
+    };
+
     let userLat      = null;
     let userLng      = null;
     let gpsAccuracy  = 999;
     let selfieBase64 = null; // Data URI foto selfie yang sudah diambil
     let cameraStream = null; // MediaStream dari kamera
+
+    let map          = null;
+    let userMarker   = null;
+    let officeMarker = null;
+    let officeCircle = null;
 
     const statusEl   = document.getElementById('location-status');
     const btnCheckin = document.getElementById('btn-checkin');
@@ -185,6 +230,124 @@
     }, 1000);
 
     // ============================================================
+    // HAVERSINE DISTANCE FORMULA (Meters)
+    // ============================================================
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371000;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                  Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                  Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    // ============================================================
+    // MAP INITIALIZATION
+    // ============================================================
+    function initMap() {
+        if (map) return;
+        const mapEl = document.getElementById('attendance-map');
+        if (!mapEl) return;
+
+        map = L.map('attendance-map', {
+            zoomControl: false
+        }).setView([officeData.lat, officeData.lng], 17);
+
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap &copy; CARTO'
+        }).addTo(map);
+
+        // Marker Kantor PT. Indobismar
+        const officeIcon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style="background-color: #0a2219; color: #d4af37; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; border: 2px solid #d4af37; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3);" title="${officeData.name}">🏢</div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
+        });
+
+        officeMarker = L.marker([officeData.lat, officeData.lng], { icon: officeIcon }).addTo(map)
+            .bindPopup(`<b>${officeData.name}</b><br>Radius Absen: ${officeData.radius}m`);
+
+        // Lingkaran Radius Kantor
+        officeCircle = L.circle([officeData.lat, officeData.lng], {
+            color: '#10b981',
+            fillColor: '#10b981',
+            fillOpacity: 0.15,
+            radius: officeData.radius
+        }).addTo(map);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initMap();
+    });
+
+    function updateUserMapAndLocation(lat, lng, accuracy) {
+        if (!map) initMap();
+
+        const userIcon = L.divIcon({
+            className: 'custom-user-icon',
+            html: `<div style="background-color: #2563eb; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; border: 2px solid white; box-shadow: 0 0 0 4px rgba(37,99,235,0.3);" title="Lokasi Anda">📍</div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14]
+        });
+
+        if (userMarker) {
+            userMarker.setLatLng([lat, lng]);
+        } else if (map) {
+            userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map)
+                .bindPopup(`<b>Lokasi Anda</b><br>Akurasi: ±${accuracy.toFixed(1)}m`);
+        }
+
+        const distance = calculateDistance(lat, lng, officeData.lat, officeData.lng);
+        const isWithinRadius = distance <= officeData.radius;
+
+        if (officeCircle) {
+            officeCircle.setStyle({
+                color: isWithinRadius ? '#10b981' : '#ef4444',
+                fillColor: isWithinRadius ? '#10b981' : '#ef4444'
+            });
+        }
+
+        const distanceBadge = document.getElementById('distance-badge');
+        const radiusStatusPill = document.getElementById('radius-status-pill');
+
+        if (distanceBadge && radiusStatusPill) {
+            distanceBadge.classList.remove('hidden');
+            if (isWithinRadius) {
+                radiusStatusPill.className = 'px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-700 border border-emerald-500/20';
+                radiusStatusPill.innerHTML = `✓ Dalam Radius (${distance.toFixed(0)}m)`;
+            } else {
+                radiusStatusPill.className = 'px-2.5 py-1 rounded-lg text-[10px] font-extrabold uppercase tracking-wider bg-red-500/10 text-red-700 border border-red-500/20';
+                radiusStatusPill.innerHTML = `⚠️ Luar Radius (${distance.toFixed(0)}m dari kantor)`;
+            }
+        }
+
+        if (map) {
+            const bounds = L.latLngBounds([
+                [lat, lng],
+                [officeData.lat, officeData.lng]
+            ]);
+            map.fitBounds(bounds, { padding: [35, 35], maxZoom: 18 });
+        }
+
+        statusEl.innerHTML = `
+            <div class="text-emerald-700 font-extrabold text-xs uppercase tracking-wider mb-1 flex items-center justify-center gap-2">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                ✓ GPS AKTIF TERKUNCI
+            </div>
+            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Jarak: ${distance.toFixed(0)}m • Akurasi GPS: ±${accuracy.toFixed(1)}m</p>
+        `;
+
+        if (btnCheckout) btnCheckout.disabled = false;
+        updateCheckinButton();
+    }
+
+    // ============================================================
     // GPS — watchPosition (realtime update)
     // ============================================================
     if (navigator.geolocation) {
@@ -194,19 +357,7 @@
                 userLng     = pos.coords.longitude;
                 gpsAccuracy = pos.coords.accuracy;
 
-                statusEl.innerHTML = `
-                    <div class="text-emerald-700 font-extrabold text-xs uppercase tracking-wider mb-1 flex items-center justify-center gap-2">
-                        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                        ✓ GPS AKTIF TERKUNCI
-                    </div>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Margin Akurasi: ${gpsAccuracy.toFixed(1)}m</p>
-                `;
-
-                // Checkout button selalu aktif setelah GPS ok
-                if (btnCheckout) btnCheckout.disabled = false;
-
-                // Checkin button aktif hanya jika sudah ada selfie
-                updateCheckinButton();
+                updateUserMapAndLocation(userLat, userLng, gpsAccuracy);
             },
             err => {
                 statusEl.innerHTML = `
