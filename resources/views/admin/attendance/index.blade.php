@@ -164,7 +164,7 @@
     <!-- Filter Form Container -->
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
         <form method="GET" action="{{ route('admin.attendance.index') }}">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 
                 <!-- Karyawan Select -->
                 <div>
@@ -187,6 +187,16 @@
                         <option value="on_time" {{ request('status') === 'on_time' ? 'selected' : '' }}>Tepat Waktu</option>
                         <option value="late" {{ request('status') === 'late' ? 'selected' : '' }}>Terlambat</option>
                         <option value="absent" {{ request('status') === 'absent' ? 'selected' : '' }}>Alpha</option>
+                    </select>
+                </div>
+
+                <!-- GPS Suspect Filter -->
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1.5">Filter GPS</label>
+                    <select name="suspect" class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white transition duration-200">
+                        <option value="">-- Semua --</option>
+                        <option value="1" {{ request('suspect') === '1' ? 'selected' : '' }}>⚠️ GPS Mencurigakan</option>
+                        <option value="0" {{ request('suspect') === '0' ? 'selected' : '' }}>✓ GPS Normal</option>
                     </select>
                 </div>
 
@@ -219,17 +229,18 @@
             <table class="w-full min-w-[800px] border-collapse">
                 <thead>
                     <tr class="bg-[#f0f4f2] border-b border-gray-100">
-                        <th class="px-6 py-4.5 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Tanggal</th>
-                        <th class="px-6 py-4.5 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Karyawan</th>
-                        <th class="px-6 py-4.5 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Jam Masuk</th>
-                        <th class="px-6 py-4.5 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Jam Keluar</th>
-                        <th class="px-6 py-4.5 text-center text-xs font-bold text-[#0a2219] uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4.5 text-center text-xs font-bold text-[#0a2219] uppercase tracking-wider">Metode</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Tanggal</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Karyawan</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Jam Masuk</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Jam Keluar</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-[#0a2219] uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-[#0a2219] uppercase tracking-wider">Metode</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-[#0a2219] uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse ($attendances as $attendance)
-                        <tr class="hover:bg-[#fcfdfc] transition duration-150">
+                        <tr class="hover:bg-[#fcfdfc] transition duration-150 {{ $attendance->is_suspect ? 'bg-amber-50/40' : '' }}">
                             <!-- Date -->
                             <td class="px-6 py-4 text-sm font-semibold text-gray-600">
                                 {{ $attendance->date->format('d M Y') }}
@@ -260,31 +271,46 @@
                             
                             <!-- Status Badges -->
                             <td class="px-6 py-4 text-center">
-                                @if ($attendance->status === 'on_time')
-                                    <span class="inline-flex items-center px-2.5 py-1 bg-emerald-500/10 text-emerald-700 text-xs font-extrabold rounded-lg border border-emerald-500/20 uppercase tracking-wider">
-                                        Tepat Waktu
-                                    </span>
-                                @elseif ($attendance->status === 'late')
-                                    <span class="inline-flex items-center px-2.5 py-1 bg-amber-500/10 text-amber-700 text-xs font-extrabold rounded-lg border border-amber-500/20 uppercase tracking-wider">
-                                        Terlambat
-                                    </span>
-                                @else
-                                    <span class="inline-flex items-center px-2.5 py-1 bg-red-500/10 text-red-700 text-xs font-extrabold rounded-lg border border-red-500/20 uppercase tracking-wider">
-                                        Mangkir / Alpha
-                                    </span>
-                                @endif
+                                <div class="flex flex-col items-center gap-1">
+                                    @if ($attendance->status === 'on_time')
+                                        <span class="inline-flex items-center px-2.5 py-1 bg-emerald-500/10 text-emerald-700 text-xs font-extrabold rounded-lg border border-emerald-500/20 uppercase tracking-wider">Tepat Waktu</span>
+                                    @elseif ($attendance->status === 'late')
+                                        <span class="inline-flex items-center px-2.5 py-1 bg-amber-500/10 text-amber-700 text-xs font-extrabold rounded-lg border border-amber-500/20 uppercase tracking-wider">Terlambat</span>
+                                    @else
+                                        <span class="inline-flex items-center px-2.5 py-1 bg-red-500/10 text-red-700 text-xs font-extrabold rounded-lg border border-red-500/20 uppercase tracking-wider">Mangkir / Alpha</span>
+                                    @endif
+                                    @if ($attendance->is_suspect)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-extrabold rounded-md border border-amber-300 uppercase tracking-wider">
+                                            ⚠️ GPS Suspect
+                                        </span>
+                                    @endif
+                                </div>
                             </td>
                             
                             <!-- Source Methods -->
                             <td class="px-6 py-4 text-center">
-                                <span class="inline-flex items-center px-2 py-0.5 bg-gray-50 border border-gray-200 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wider">
-                                    {{ $attendance->source === 'pwa' ? 'GPS PWA' : 'Fingerprint' }}
-                                </span>
+                                <div class="flex flex-col items-center gap-1">
+                                    <span class="inline-flex items-center px-2 py-0.5 bg-gray-50 border border-gray-200 text-gray-600 text-[10px] font-bold rounded uppercase tracking-wider">
+                                        {{ $attendance->source === 'pwa' ? 'GPS PWA' : 'Fingerprint' }}
+                                    </span>
+                                    @if ($attendance->selfie_photo)
+                                        <span class="inline-flex items-center gap-0.5 px-2 py-0.5 bg-[#e7f0ec] border border-[#d2dfd8] text-[#0a2219] text-[10px] font-bold rounded uppercase tracking-wider">
+                                            📷 Selfie
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
+
+                            <!-- Action -->
+                            <td class="px-6 py-4 text-center">
+                                <a href="{{ route('admin.attendance.show', $attendance->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-[#0a2219] hover:bg-[#123b2c] text-white text-xs font-bold rounded-xl transition shadow-sm">
+                                    Detail →
+                                </a>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-gray-400 font-medium">
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-400 font-medium">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />

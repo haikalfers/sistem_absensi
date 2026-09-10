@@ -30,6 +30,11 @@ class AttendanceController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Filter berdasarkan GPS suspect
+        if ($request->filled('suspect')) {
+            $query->where('is_suspect', (bool) $request->suspect);
+        }
+
         // Filter berdasarkan tanggal
         if ($request->filled('date_from')) {
             $query->whereDate('date', '>=', $request->date_from);
@@ -39,15 +44,16 @@ class AttendanceController extends Controller
         }
 
         $attendances = $query->orderBy('date', 'desc')->paginate(20);
-        $employees = Employee::all();
-        $statuses = ['on_time', 'late', 'absent'];
+        $employees   = Employee::all();
+        $statuses    = ['on_time', 'late', 'absent'];
 
         return view('admin.attendance.index', [
             'attendances' => $attendances,
-            'employees' => $employees,
-            'statuses' => $statuses,
+            'employees'   => $employees,
+            'statuses'    => $statuses,
         ]);
     }
+
 
     /**
      * Tampilkan detail absensi

@@ -72,6 +72,49 @@
         </div>
     </div>
 
+    {{-- ===== NOTIFIKASI SISTEM ===== --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+
+        {{-- Suspect GPS Alert --}}
+        @php
+            $suspectToday = \App\Models\Attendance::whereDate('date', today())->where('is_suspect', true)->count();
+        @endphp
+        @if ($suspectToday > 0)
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-4">
+            <div class="w-10 h-10 bg-amber-100 border border-amber-200 rounded-xl flex items-center justify-center text-amber-600 flex-shrink-0">
+                <span class="text-xl">⚠️</span>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-extrabold text-amber-800 uppercase tracking-wider">GPS Mencurigakan Terdeteksi</p>
+                <p class="text-xs text-amber-700 font-semibold mt-1">
+                    <strong>{{ $suspectToday }} absensi</strong> hari ini terdeteksi GPS mencurigakan dan menunggu verifikasi HR.
+                </p>
+                <a href="{{ route('admin.attendance.index') }}?suspect=1" class="inline-flex items-center mt-2 text-[10px] font-extrabold text-amber-800 uppercase tracking-wider hover:underline">
+                    Tinjau Sekarang →
+                </a>
+            </div>
+        </div>
+        @endif
+
+        {{-- Selfie Auto-delete Notice --}}
+        <div class="bg-[#f0f7f3] border border-[#d2dfd8] rounded-2xl p-5 flex items-start gap-4">
+            <div class="w-10 h-10 bg-[#e7f0ec] border border-[#d2dfd8] rounded-xl flex items-center justify-center text-[#0a2219] flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-xs font-extrabold text-[#0a2219] uppercase tracking-wider">Kebijakan Foto Selfie</p>
+                <p class="text-xs text-gray-600 font-semibold mt-1">
+                    Foto selfie absensi PWA disimpan selama <strong>7 hari</strong> sebagai bukti kehadiran, kemudian dihapus otomatis oleh sistem setiap tengah malam.
+                    Data absensi (jam, status) tetap tersimpan permanen.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
     <!-- Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         

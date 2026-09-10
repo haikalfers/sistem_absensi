@@ -41,31 +41,37 @@ class AttendanceController extends Controller
     public function checkIn(Request $request)
     {
         $request->validate([
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
+            'latitude'     => 'required|numeric|between:-90,90',
+            'longitude'    => 'required|numeric|between:-180,180',
+            'gps_accuracy' => 'nullable|numeric|min:0',
+            'selfie'       => 'nullable|string', // base64 data URI
         ]);
 
         $employee = auth()->user()->employee;
 
         $result = $this->attendanceService->processCheckIn(
-            employeeId: $employee->id,
-            lat: $request->latitude,
-            lng: $request->longitude,
-            source: 'pwa'
+            employeeId:   $employee->id,
+            lat:          $request->latitude,
+            lng:          $request->longitude,
+            source:       'pwa',
+            gpsAccuracy:  (float) ($request->gps_accuracy ?? 999),
+            selfieBase64: $request->selfie,
+            ipAddress:    $request->ip()
         );
 
         if ($result['success']) {
             return response()->json([
-                'success' => true,
-                'message' => $result['message'],
+                'success'    => true,
+                'message'    => $result['message'],
                 'attendance' => $result['attendance'],
+                'is_suspect' => $result['is_suspect'] ?? false,
             ], 200);
         }
 
         return response()->json([
             'success' => false,
             'message' => $result['message'],
-            'code' => $result['code'] ?? 'ERROR',
+            'code'    => $result['code'] ?? 'ERROR',
         ], 422);
     }
 
@@ -75,7 +81,7 @@ class AttendanceController extends Controller
     public function checkOut(Request $request)
     {
         $request->validate([
-            'latitude' => 'nullable|numeric|between:-90,90',
+            'latitude'  => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
         ]);
 
@@ -83,15 +89,15 @@ class AttendanceController extends Controller
 
         $result = $this->attendanceService->processCheckOut(
             employeeId: $employee->id,
-            lat: $request->latitude ?? 0,
-            lng: $request->longitude ?? 0,
-            source: 'pwa'
+            lat:        $request->latitude ?? 0,
+            lng:        $request->longitude ?? 0,
+            source:     'pwa'
         );
 
         if ($result['success']) {
             return response()->json([
-                'success' => true,
-                'message' => $result['message'],
+                'success'    => true,
+                'message'    => $result['message'],
                 'attendance' => $result['attendance'],
             ], 200);
         }
@@ -99,9 +105,10 @@ class AttendanceController extends Controller
         return response()->json([
             'success' => false,
             'message' => $result['message'],
-            'code' => $result['code'] ?? 'ERROR',
+            'code'    => $result['code'] ?? 'ERROR',
         ], 422);
     }
+
 
     /**
      * Riwayat absensi (list semua)

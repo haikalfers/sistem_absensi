@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Employee;
+use App\Http\Controllers\Admin\PayrollSettingController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================
@@ -102,6 +103,9 @@ Route::middleware('auth')->group(function () {
             Route::post('/locations', [Admin\SettingController::class, 'updateLocations'])->name('locations.update');
             Route::get('/schedules', [Admin\SettingController::class, 'schedules'])->name('schedules');
             Route::post('/schedules', [Admin\SettingController::class, 'updateSchedules'])->name('schedules.update');
+            // Pengaturan Penggajian (BPJS & Potongan)
+            Route::get('/payroll', [PayrollSettingController::class, 'index'])->name('payroll');
+            Route::post('/payroll', [PayrollSettingController::class, 'update'])->name('payroll.update');
         });
     });
 

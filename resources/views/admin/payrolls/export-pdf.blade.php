@@ -311,8 +311,8 @@
         <table class="header-table">
             <tr>
                 <td style="width:60%;">
-                    <div class="company-name">PT. Triliun Anugrah Nusantara</div>
-                    <div class="company-subtitle">Human Resources &amp; Payroll Department</div>
+                    <div class="company-name">PT. Indobismar</div>
+                    <div class="company-subtitle">Human Resources &amp; Payroll Department — Surabaya</div>
                 </td>
                 <td style="width:40%;">
                     <div class="doc-title">Laporan Payroll</div>
@@ -326,12 +326,27 @@
     {{-- ===== SUMMARY CARDS ===== --}}
     @php
         $totalGross = $payroll->details->sum(function($d) {
-            return ($d->base_salary ?? 0) + ($d->meal_allowance ?? 0) + ($d->overtime_total ?? 0) + ($d->kpi_bonus ?? 0);
+            return ($d->base_salary ?? 0)
+                + ($d->bpjs_jht_company ?? 0)
+                + ($d->bpjs_jkk_income ?? 0)
+                + ($d->bpjs_jkm_income ?? 0)
+                + ($d->bpjs_jkn_company ?? 0)
+                + ($d->jp_company_income ?? 0)
+                + ($d->overtime_total ?? 0);
         });
         $totalDeductions = $payroll->details->sum(function($d) {
-            return ($d->bpjs_tk_deduction ?? 0) + ($d->bpjs_kes_deduction ?? 0) + ($d->pph21_deduction ?? 0) + ($d->other_deduction ?? 0);
+            return ($d->bpjs_jht_employee ?? 0)
+                + ($d->bpjs_jkk_deduct ?? 0)
+                + ($d->bpjs_jkm_deduct ?? 0)
+                + ($d->bpjs_jkn_company_deduct ?? 0)
+                + ($d->jp_company_deduct ?? 0)
+                + ($d->jp_employee ?? 0)
+                + ($d->pot_bpjs ?? 0)
+                + ($d->pot_pesantren ?? 0)
+                + ($d->absent_deduction ?? 0)
+                + ($d->other_deduction ?? 0);
         });
-        $totalNet = $payroll->details->sum('net_salary');
+        $totalNet       = $payroll->details->sum('net_salary');
         $totalEmployees = $payroll->details->count();
     @endphp
 
@@ -410,23 +425,50 @@
             <thead>
                 <tr>
                     <th style="width:3%">#</th>
-                    <th style="width:14%">Karyawan</th>
-                    <th style="width:8%">Jabatan</th>
-                    <th class="tr" style="width:10%">Gaji Pokok</th>
-                    <th class="tr" style="width:9%">Tunjangan Makan</th>
-                    <th class="tr" style="width:8%">Lembur</th>
-                    <th class="tr" style="width:7%">Bonus KPI</th>
-                    <th class="tr" style="width:10%">Total Bruto</th>
-                    <th class="tr" style="width:10%">Total Potongan</th>
-                    <th class="tr" style="width:10%">Gaji Bersih</th>
-                    <th class="tc" style="width:4%">Hadir</th>
+                    <th style="width:13%">Karyawan</th>
+                    <th style="width:7%">Jabatan</th>
+                    <th class="tr" style="width:9%">Gaji Pokok</th>
+                    <th class="tr" style="width:7%">BPJS Perusahaan</th>
+                    <th class="tr" style="width:7%">Lembur</th>
+                    <th class="tr" style="width:9%">Total Bruto</th>
+                    <th class="tr" style="width:7%">Pot. BPJS TK</th>
+                    <th class="tr" style="width:7%">Pot. JP TK</th>
+                    <th class="tr" style="width:7%">Pot. Pesantren</th>
+                    <th class="tr" style="width:7%">Pot. Alpa</th>
+                    <th class="tr" style="width:9%">Total Potongan</th>
+                    <th class="tr" style="width:9%">Gaji Bersih</th>
+                    <th class="tc" style="width:3%">Hadir</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($payroll->details as $i => $detail)
                 @php
-                    $gross  = ($detail->base_salary ?? 0) + ($detail->meal_allowance ?? 0) + ($detail->overtime_total ?? 0) + ($detail->kpi_bonus ?? 0);
-                    $deduct = ($detail->bpjs_tk_deduction ?? 0) + ($detail->bpjs_kes_deduction ?? 0) + ($detail->pph21_deduction ?? 0) + ($detail->other_deduction ?? 0);
+                    $gross  = ($detail->base_salary ?? 0)
+                            + ($detail->bpjs_jht_company ?? 0)
+                            + ($detail->bpjs_jkk_income ?? 0)
+                            + ($detail->bpjs_jkm_income ?? 0)
+                            + ($detail->bpjs_jkn_company ?? 0)
+                            + ($detail->jp_company_income ?? 0)
+                            + ($detail->overtime_total ?? 0);
+                    $deduct = ($detail->bpjs_jht_employee ?? 0)
+                            + ($detail->bpjs_jkk_deduct ?? 0)
+                            + ($detail->bpjs_jkm_deduct ?? 0)
+                            + ($detail->bpjs_jkn_company_deduct ?? 0)
+                            + ($detail->jp_company_deduct ?? 0)
+                            + ($detail->jp_employee ?? 0)
+                            + ($detail->pot_bpjs ?? 0)
+                            + ($detail->pot_pesantren ?? 0)
+                            + ($detail->absent_deduction ?? 0)
+                            + ($detail->other_deduction ?? 0);
+                    $bpjsPerusahaan = ($detail->bpjs_jht_company ?? 0)
+                                    + ($detail->bpjs_jkk_income ?? 0)
+                                    + ($detail->bpjs_jkm_income ?? 0)
+                                    + ($detail->bpjs_jkn_company ?? 0)
+                                    + ($detail->jp_company_income ?? 0);
+                    $potBpjsTk = ($detail->bpjs_jht_employee ?? 0)
+                               + ($detail->bpjs_jkk_deduct ?? 0)
+                               + ($detail->bpjs_jkm_deduct ?? 0);
+                    $potJpTk = ($detail->jp_employee ?? 0);
                 @endphp
                 <tr>
                     <td class="tc">{{ $i + 1 }}</td>
@@ -436,10 +478,13 @@
                     </td>
                     <td>{{ $detail->employee->position ?? '-' }}</td>
                     <td class="tr">Rp {{ number_format($detail->base_salary ?? 0, 0, ',', '.') }}</td>
-                    <td class="tr">Rp {{ number_format($detail->meal_allowance ?? 0, 0, ',', '.') }}</td>
+                    <td class="tr">Rp {{ number_format($bpjsPerusahaan, 0, ',', '.') }}</td>
                     <td class="tr">Rp {{ number_format($detail->overtime_total ?? 0, 0, ',', '.') }}</td>
-                    <td class="tr">Rp {{ number_format($detail->kpi_bonus ?? 0, 0, ',', '.') }}</td>
                     <td class="tr gold">Rp {{ number_format($gross, 0, ',', '.') }}</td>
+                    <td class="tr red">Rp {{ number_format($potBpjsTk, 0, ',', '.') }}</td>
+                    <td class="tr red">Rp {{ number_format($potJpTk, 0, ',', '.') }}</td>
+                    <td class="tr red">Rp {{ number_format($detail->pot_pesantren ?? 0, 0, ',', '.') }}</td>
+                    <td class="tr red">Rp {{ number_format($detail->absent_deduction ?? 0, 0, ',', '.') }}</td>
                     <td class="tr red">- Rp {{ number_format($deduct, 0, ',', '.') }}</td>
                     <td class="tr green">Rp {{ number_format($detail->net_salary ?? 0, 0, ',', '.') }}</td>
                     <td class="tc">{{ $detail->attendance_days ?? 0 }} hr</td>
@@ -456,10 +501,13 @@
                 <tr class="totals-row">
                     <td colspan="3" style="color:#d4af37 !important;">TOTAL KESELURUHAN</td>
                     <td class="tr">Rp {{ number_format($payroll->details->sum('base_salary'), 0, ',', '.') }}</td>
-                    <td class="tr">Rp {{ number_format($payroll->details->sum('meal_allowance'), 0, ',', '.') }}</td>
+                    <td class="tr">-</td>
                     <td class="tr">Rp {{ number_format($payroll->details->sum('overtime_total'), 0, ',', '.') }}</td>
-                    <td class="tr">Rp {{ number_format($payroll->details->sum('kpi_bonus'), 0, ',', '.') }}</td>
                     <td class="tr" style="color:#d4af37 !important;">Rp {{ number_format($totalGross, 0, ',', '.') }}</td>
+                    <td class="tr">-</td>
+                    <td class="tr">-</td>
+                    <td class="tr">-</td>
+                    <td class="tr">-</td>
                     <td class="tr" style="color:#fca5a5 !important;">Rp {{ number_format($totalDeductions, 0, ',', '.') }}</td>
                     <td class="tr" style="color:#d4af37 !important;">Rp {{ number_format($totalNet, 0, ',', '.') }}</td>
                     <td class="tc">{{ $payroll->details->sum('attendance_days') }} hr</td>
@@ -471,7 +519,7 @@
 
     {{-- ===== FOOTER ===== --}}
     <div class="footer">
-        <strong>PT. Triliun Anugrah Nusantara</strong> &mdash; Dokumen ini diterbitkan secara otomatis oleh Sistem Absensi Karyawan.<br>
+        <strong>PT. Indobismar</strong> &mdash; Dokumen ini diterbitkan secara otomatis oleh Sistem Absensi &amp; Penggajian Karyawan.<br>
         Laporan payroll ini bersifat <strong>RAHASIA</strong> dan hanya untuk keperluan internal perusahaan. &nbsp;|&nbsp;
         Periode: <strong>{{ $payroll->period_name }}</strong> &nbsp;|&nbsp;
         Total: <strong>{{ $totalEmployees }}</strong> karyawan
