@@ -16,6 +16,8 @@ class AttendanceRevision extends Model
         'requested_check_in',
         'requested_check_out',
         'reason',
+        'selfie_photo',
+        'selfie_expires_at',
         'status',
         'reviewed_by',
         'review_notes',
@@ -23,8 +25,9 @@ class AttendanceRevision extends Model
     ];
 
     protected $casts = [
-        'revision_date' => 'date',
-        'reviewed_at'   => 'datetime',
+        'revision_date'     => 'date',
+        'reviewed_at'       => 'datetime',
+        'selfie_expires_at' => 'datetime',
     ];
 
     // ── Relasi ──────────────────────────────────────────────────

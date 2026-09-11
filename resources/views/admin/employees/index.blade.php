@@ -46,9 +46,14 @@
                                 </div>
                             </td>
                             
-                            <!-- Position -->
+                            <!-- Position & Division -->
                             <td class="px-6 py-4">
-                                <span class="text-sm text-gray-700 font-medium">{{ $employee->position }}</span>
+                                <p class="text-sm text-gray-800 font-bold">{{ $employee->position }}</p>
+                                @if($employee->division)
+                                    <p class="text-[10px] text-gray-500 font-semibold mt-0.5">
+                                        {{ $employee->division }}{{ $employee->sub_division ? ' · ' . $employee->sub_division : '' }}
+                                    </p>
+                                @endif
                             </td>
                             
                             <!-- Department -->

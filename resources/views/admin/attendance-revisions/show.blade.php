@@ -107,6 +107,27 @@
                 </div>
             </div>
 
+            {{-- Bukti Foto Selfie (Live Camera) --}}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <div class="flex items-center justify-between mb-3">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Bukti Foto Selfie Live</p>
+                    <span class="text-[9px] font-extrabold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100 uppercase">Live Camera</span>
+                </div>
+                @if($revision->selfie_photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($revision->selfie_photo))
+                    <div class="relative rounded-xl overflow-hidden border border-gray-200 aspect-square bg-gray-900">
+                        <img src="{{ asset('storage/' . $revision->selfie_photo) }}" alt="Bukti Selfie Live" class="w-full h-full object-cover"/>
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3 text-white">
+                            <p class="text-[9px] font-semibold opacity-80 uppercase tracking-wider">Hapus Otomatis (7 Hari):</p>
+                            <p class="text-xs font-bold text-amber-300">{{ $revision->selfie_expires_at?->format('d M Y, H:i') ?? '-' }}</p>
+                        </div>
+                    </div>
+                @else
+                    <div class="p-4 bg-gray-50 border border-gray-200 rounded-xl text-center">
+                        <p class="text-xs text-gray-400 font-semibold">Foto selfie tidak tersedia atau sudah kadaluarsa (melewati 7 hari).</p>
+                    </div>
+                @endif
+            </div>
+
         </div>
 
         {{-- ── RIGHT: Comparison + Aksi ─────────────────────────── --}}

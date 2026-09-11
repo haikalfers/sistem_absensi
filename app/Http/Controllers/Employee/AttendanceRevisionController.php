@@ -76,6 +76,7 @@ class AttendanceRevisionController extends Controller
             'requested_check_in'  => ['nullable', 'date_format:H:i'],
             'requested_check_out' => ['nullable', 'date_format:H:i', 'after:requested_check_in'],
             'reason'              => ['required', 'string', 'min:10', 'max:500'],
+            'selfie'              => ['required', 'string'],
         ], [
             'revision_date.required'       => 'Tanggal revisi wajib dipilih.',
             'revision_date.before'         => 'Tanggal revisi harus hari sebelumnya.',
@@ -83,6 +84,7 @@ class AttendanceRevisionController extends Controller
             'requested_check_out.after'    => 'Jam keluar harus setelah jam masuk.',
             'reason.required'              => 'Alasan pengajuan wajib diisi.',
             'reason.min'                   => 'Alasan minimal 10 karakter.',
+            'selfie.required'              => 'Foto selfie bukti kehadiran wajib diambil secara live dari kamera.',
         ]);
 
         $employee = auth()->user()->employee;
@@ -99,6 +101,10 @@ class AttendanceRevisionController extends Controller
                 ->withErrors(['revision_date' => 'Sudah ada pengajuan pending untuk tanggal ini. Tunggu hingga diproses admin.']);
         }
 
+        // Simpan foto selfie
+        $selfiePathRel = $this->storeSelfiePhoto($request->selfie, $employee->id, Carbon::parse($request->revision_date));
+        $selfieExpiresAt = Carbon::now()->addDays(7);
+
         // Cari attendance yang sudah ada (jika ada)
         $attendance = Attendance::where('employee_id', $employee->id)
             ->whereDate('date', $request->revision_date)
@@ -111,12 +117,40 @@ class AttendanceRevisionController extends Controller
             'requested_check_in'  => $request->requested_check_in,
             'requested_check_out' => $request->requested_check_out,
             'reason'              => $request->reason,
+            'selfie_photo'        => $selfiePathRel,
+            'selfie_expires_at'   => $selfieExpiresAt,
             'status'              => 'pending',
         ]);
 
         return redirect()
             ->route('employee.attendance-revisions.index')
             ->with('success', 'Pengajuan presensi ulang berhasil dikirim. Menunggu persetujuan admin.');
+    }
+
+    /**
+     * Simpan foto selfie dari base64 ke storage
+     */
+    private function storeSelfiePhoto(string $base64Data, int $employeeId, Carbon $date): ?string
+    {
+        try {
+            if (str_contains($base64Data, ',')) {
+                [, $base64Data] = explode(',', $base64Data, 2);
+            }
+
+            $imageData = base64_decode($base64Data);
+            if (!$imageData) return null;
+
+            $dir      = 'selfies/revisions/' . $date->format('Y/m/d');
+            $filename = "rev_{$employeeId}_{$date->format('Ymd')}_" . now()->format('His') . '.jpg';
+            $path     = "{$dir}/{$filename}";
+
+            \Illuminate\Support\Facades\Storage::disk('public')->put($path, $imageData);
+
+            return $path;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::warning('Revision Selfie Storage Error', ['employee_id' => $employeeId, 'error' => $e->getMessage()]);
+            return null;
+        }
     }
 
     /**

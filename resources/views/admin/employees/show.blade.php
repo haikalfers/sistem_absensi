@@ -78,6 +78,10 @@
                     <p class="text-sm font-semibold text-gray-800 mt-0.5">{{ $employee->division ?? '-' }}</p>
                 </div>
                 <div>
+                    <h4 class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Subdivisi</h4>
+                    <p class="text-sm font-semibold text-gray-800 mt-0.5">{{ $employee->sub_division ?? '-' }}</p>
+                </div>
+                <div>
                     <h4 class="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest">Jabatan Staf</h4>
                     <p class="text-sm font-semibold text-gray-800 mt-0.5">{{ $employee->position }}</p>
                 </div>

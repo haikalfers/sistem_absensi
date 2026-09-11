@@ -41,7 +41,7 @@ class EmployeeController extends Controller
             'employee_code' => 'required|unique:employees,employee_code',
             'position' => 'required|string|max:100',
             'division' => 'nullable|string|max:100',
-            'department' => 'required|in:Rungkut,Driyorejo',
+            'sub_division' => 'nullable|string|max:100',
             'base_salary' => 'required|numeric|min:0',
             'password' => 'required|min:8|confirmed',
         ]);
@@ -64,7 +64,8 @@ class EmployeeController extends Controller
                 'name' => $validated['name'],
                 'position' => $validated['position'],
                 'division' => $validated['division'],
-                'department' => $validated['department'],
+                'sub_division' => $validated['sub_division'],
+                'department' => 'Indobismar',
                 'base_salary' => $validated['base_salary'],
             ]);
 
@@ -107,11 +108,12 @@ class EmployeeController extends Controller
             'name' => 'required|string|max:255',
             'position' => 'required|string|max:100',
             'division' => 'nullable|string|max:100',
-            'department' => 'required|in:Rungkut,Driyorejo',
+            'sub_division' => 'nullable|string|max:100',
             'base_salary' => 'required|numeric|min:0',
         ]);
 
         try {
+            $validated['department'] = 'Indobismar';
             $employee->update($validated);
             $employee->user()->update(['name' => $validated['name']]);
 

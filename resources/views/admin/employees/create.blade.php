@@ -49,11 +49,11 @@
                         @error('employee_code') <p class="text-red-600 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
                     </div>
 
-                    <!-- Position -->
+                    <!-- Position / Jabatan -->
                     <div>
                         <label for="position" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Jabatan *</label>
                         <input type="text" name="position" id="position" value="{{ old('position') }}" 
-                               placeholder="e.g., Manager, Staff"
+                               placeholder="e.g., Manager, Kepala Subdivisi, Staff"
                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] transition duration-200"
                                required>
                         @error('position') <p class="text-red-600 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
@@ -64,23 +64,25 @@
                     <!-- Division -->
                     <div>
                         <label for="division" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Divisi</label>
-                        <input type="text" name="division" id="division" value="{{ old('division') }}" 
-                               placeholder="e.g., Produksi, HR"
-                               class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] transition duration-200">
+                        <select name="division" id="division" 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white transition duration-200"
+                                onchange="updateSubDivisions()">
+                            <option value="">-- Pilih Divisi --</option>
+                            @foreach(config('organization.structure', []) as $divName => $subs)
+                                <option value="{{ $divName }}" {{ old('division') === $divName ? 'selected' : '' }}>{{ $divName }}</option>
+                            @endforeach
+                        </select>
                         @error('division') <p class="text-red-600 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
                     </div>
 
-                    <!-- Department -->
+                    <!-- Sub Division -->
                     <div>
-                        <label for="department" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Departemen *</label>
-                        <select name="department" id="department" 
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white transition duration-200"
-                                required>
-                            <option value="">-- Pilih Departemen --</option>
-                            <option value="Rungkut" {{ old('department') === 'Rungkut' ? 'selected' : '' }}>Rungkut</option>
-                            <option value="Driyorejo" {{ old('department') === 'Driyorejo' ? 'selected' : '' }}>Driyorejo</option>
+                        <label for="sub_division" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Subdivisi</label>
+                        <select name="sub_division" id="sub_division" 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white transition duration-200">
+                            <option value="">-- Pilih Subdivisi --</option>
                         </select>
-                        @error('department') <p class="text-red-600 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
+                        @error('sub_division') <p class="text-red-600 text-xs mt-1 font-medium">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
@@ -143,7 +145,39 @@
             </form>
         </div>
     </div>
+
 <script>
+    const orgStructure = @json(config('organization.structure', []));
+    const oldSubDiv = @json(old('sub_division'));
+
+    function updateSubDivisions() {
+        const divSelect = document.getElementById('division');
+        const subSelect = document.getElementById('sub_division');
+        const selectedDiv = divSelect.value;
+
+        subSelect.innerHTML = '<option value="">-- Pilih Subdivisi --</option>';
+
+        if (selectedDiv && orgStructure[selectedDiv] && orgStructure[selectedDiv].length > 0) {
+            orgStructure[selectedDiv].forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.textContent = sub;
+                if (oldSubDiv === sub) opt.selected = true;
+                subSelect.appendChild(opt);
+            });
+            subSelect.disabled = false;
+        } else {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = '-- Tanpa Subdivisi --';
+            subSelect.appendChild(opt);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateSubDivisions();
+    });
+
     function togglePassword(inputId, iconId) {
         const input = document.getElementById(inputId);
         const icon = document.getElementById(iconId);

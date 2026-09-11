@@ -56,8 +56,12 @@
     <h4 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-4">Informasi Karyawan</h4>
     <div class="space-y-3 text-xs font-semibold text-gray-600">
         <div class="flex justify-between items-center py-2.5 border-b border-gray-50">
-            <span class="text-gray-400 font-bold uppercase tracking-wider">Divisi / Unit</span>
+            <span class="text-gray-400 font-bold uppercase tracking-wider">Divisi</span>
             <span class="text-gray-800 font-bold">{{ $employee->division ?? '-' }}</span>
+        </div>
+        <div class="flex justify-between items-center py-2.5 border-b border-gray-50">
+            <span class="text-gray-400 font-bold uppercase tracking-wider">Subdivisi</span>
+            <span class="text-gray-800 font-bold">{{ $employee->sub_division ?? '-' }}</span>
         </div>
         <div class="flex justify-between items-center py-2.5 border-b border-gray-50">
             <span class="text-gray-400 font-bold uppercase tracking-wider">Status</span>

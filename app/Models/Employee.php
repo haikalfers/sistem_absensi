@@ -15,6 +15,7 @@ class Employee extends Model
         'name',
         'position',
         'division',
+        'sub_division',
         'department',
         'base_salary',
         'annual_leave_balance',

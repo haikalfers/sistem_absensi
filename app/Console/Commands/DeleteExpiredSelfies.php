@@ -49,6 +49,34 @@ class DeleteExpiredSelfies extends Command
             }
         }
 
+        // Hapus selfie kadaluarsa pada pengajuan presensi ulang (AttendanceRevision)
+        $expiredRevisions = \App\Models\AttendanceRevision::whereNotNull('selfie_photo')
+            ->whereNotNull('selfie_expires_at')
+            ->where('selfie_expires_at', '<=', Carbon::now())
+            ->get();
+
+        foreach ($expiredRevisions as $revision) {
+            try {
+                if (Storage::disk('public')->exists($revision->selfie_photo)) {
+                    Storage::disk('public')->delete($revision->selfie_photo);
+                }
+
+                $revision->update([
+                    'selfie_photo'      => null,
+                    'selfie_expires_at' => null,
+                ]);
+
+                $deleted++;
+            } catch (\Exception $e) {
+                $failed++;
+                Log::warning('Failed to delete expired revision selfie', [
+                    'revision_id'  => $revision->id,
+                    'selfie_photo' => $revision->selfie_photo,
+                    'error'        => $e->getMessage(),
+                ]);
+            }
+        }
+
         $this->info("✅  Selesai: {$deleted} foto dihapus, {$failed} gagal.");
 
         Log::info('DeleteExpiredSelfies Command Ran', [

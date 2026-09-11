@@ -49,30 +49,35 @@
                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] transition duration-200">
             </div>
 
-            <!-- Division -->
-            <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Divisi</label>
-                <input type="text" name="division" value="{{ old('division', $employee->division) }}" 
-                       class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] transition duration-200">
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Department -->
-            <div>
-                <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Departemen / Lokasi *</label>
-                <select name="department" required 
-                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white transition duration-200">
-                    <option value="Rungkut" {{ old('department', $employee->department) === 'Rungkut' ? 'selected' : '' }}>Rungkut</option>
-                    <option value="Driyorejo" {{ old('department', $employee->department) === 'Driyorejo' ? 'selected' : '' }}>Driyorejo</option>
-                </select>
-            </div>
-
             <!-- Base Salary -->
             <div>
                 <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Gaji Pokok (Rp) *</label>
                 <input type="number" name="base_salary" value="{{ old('base_salary', $employee->base_salary) }}" required min="0" step="1000"
                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] transition duration-200">
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Division -->
+            <div>
+                <label for="division" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Divisi</label>
+                <select name="division" id="division" 
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white transition duration-200"
+                        onchange="updateSubDivisions()">
+                    <option value="">-- Pilih Divisi --</option>
+                    @foreach(config('organization.structure', []) as $divName => $subs)
+                        <option value="{{ $divName }}" {{ old('division', $employee->division) === $divName ? 'selected' : '' }}>{{ $divName }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- Sub Division -->
+            <div>
+                <label for="sub_division" class="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Subdivisi</label>
+                <select name="sub_division" id="sub_division" 
+                        class="w-full px-4 py-2.5 border border-gray-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] bg-white transition duration-200">
+                    <option value="">-- Pilih Subdivisi --</option>
+                </select>
             </div>
         </div>
 
@@ -87,4 +92,37 @@
         </div>
     </form>
 </div>
+
+<script>
+    const orgStructure = @json(config('organization.structure', []));
+    const currentSubDiv = @json(old('sub_division', $employee->sub_division));
+
+    function updateSubDivisions() {
+        const divSelect = document.getElementById('division');
+        const subSelect = document.getElementById('sub_division');
+        const selectedDiv = divSelect.value;
+
+        subSelect.innerHTML = '<option value="">-- Pilih Subdivisi --</option>';
+
+        if (selectedDiv && orgStructure[selectedDiv] && orgStructure[selectedDiv].length > 0) {
+            orgStructure[selectedDiv].forEach(sub => {
+                const opt = document.createElement('option');
+                opt.value = sub;
+                opt.textContent = sub;
+                if (currentSubDiv === sub) opt.selected = true;
+                subSelect.appendChild(opt);
+            });
+            subSelect.disabled = false;
+        } else {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = '-- Tanpa Subdivisi --';
+            subSelect.appendChild(opt);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateSubDivisions();
+    });
+</script>
 @endsection
