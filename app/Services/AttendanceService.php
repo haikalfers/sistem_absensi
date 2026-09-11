@@ -284,7 +284,9 @@ class AttendanceService
      */
     private function getScheduleForDay(int $dayOfWeek): ?WorkSchedule
     {
-        return WorkSchedule::whereJsonContains('working_days', $dayOfWeek)->first();
+        return WorkSchedule::whereJsonContains('working_days', $dayOfWeek)
+            ->orWhereJsonContains('working_days', (string) $dayOfWeek)
+            ->first();
     }
 
     /**

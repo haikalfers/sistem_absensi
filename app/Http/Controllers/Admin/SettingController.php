@@ -80,6 +80,9 @@ class SettingController extends Controller
 
         try {
             foreach ($request->input('schedules', []) as $schedId => $data) {
+                if (isset($data['working_days']) && is_array($data['working_days'])) {
+                    $data['working_days'] = array_map('intval', $data['working_days']);
+                }
                 $schedule = WorkSchedule::findOrFail($schedId);
                 $schedule->update($data);
             }
