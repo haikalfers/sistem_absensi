@@ -128,12 +128,32 @@ class EmployeeController extends Controller
     public function destroy(Employee $employee)
     {
         try {
+            DB::beginTransaction();
+
             $name = $employee->name;
-            $employee->delete(); // User juga ikut terhapus karena cascade
+            $user = $employee->user;
+
+            // Hapus seluruh relasi anak terlebih dahulu untuk mencegah error Integrity constraint violation (FK 1451)
+            $employee->payrollDetails()->delete();
+            $employee->attendanceRevisions()->delete();
+            $employee->overtimes()->delete();
+            $employee->leaveRequests()->delete();
+            $employee->attendances()->delete();
+
+            // Hapus data karyawan
+            $employee->delete();
+
+            // Hapus akun user jika ada
+            if ($user) {
+                $user->delete();
+            }
+
+            DB::commit();
 
             return redirect()->route('admin.employees.index')
-                ->with('success', "Karyawan $name berhasil dihapus.");
+                ->with('success', "Karyawan {$name} beserta seluruh data terkait berhasil dihapus.");
         } catch (\Exception $e) {
+            DB::rollBack();
             return back()->withErrors(['error' => 'Gagal hapus karyawan: ' . $e->getMessage()]);
         }
     }

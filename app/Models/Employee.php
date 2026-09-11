@@ -50,4 +50,9 @@ class Employee extends Model
     {
         return $this->hasMany(Overtime::class);
     }
+
+    public function attendanceRevisions()
+    {
+        return $this->hasMany(AttendanceRevision::class);
+    }
 }
