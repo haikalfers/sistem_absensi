@@ -12,17 +12,16 @@ class OvertimeController extends Controller
     public function __construct(private PayrollService $payrollService) {}
 
     /**
-     * Daftar overtime yang belum di-validate
+     * Daftar pengajuan lembur karyawan (Pending / Approved / Rejected)
      */
     public function index(Request $request)
     {
-        $query = Overtime::with('employee', 'attendance');
+        $query = Overtime::with('employee', 'attendance', 'validatedBy');
 
-        // Filter hanya yang belum di-validate
-        if ($request->input('status') === 'pending') {
-            $query->whereNull('validated_by');
-        } elseif ($request->input('status') === 'validated') {
-            $query->whereNotNull('validated_by');
+        // Filter status
+        $status = $request->get('status', 'pending');
+        if ($status !== 'all') {
+            $query->where('status', $status);
         }
 
         // Filter berdasarkan tipe
@@ -30,13 +29,14 @@ class OvertimeController extends Controller
             $query->where('type', $request->type);
         }
 
-        $overtimes = $query->orderBy('date', 'desc')->paginate(20);
+        $overtimes = $query->orderBy('date', 'desc')->orderBy('created_at', 'desc')->paginate(20);
 
         $types = ['office', 'admin_production', 'production_aka', 'production_export'];
 
         return view('admin.overtime.index', [
-            'overtimes' => $overtimes,
-            'types' => $types,
+            'overtimes'    => $overtimes,
+            'types'        => $types,
+            'activeStatus' => $status,
         ]);
     }
 
@@ -53,7 +53,7 @@ class OvertimeController extends Controller
     }
 
     /**
-     * Update data overtime (sebelum di-validate)
+     * Update data overtime
      */
     public function update(Request $request, $id)
     {
@@ -71,11 +71,22 @@ class OvertimeController extends Controller
     }
 
     /**
-     * Validasi overtime (hitung amount & tandai sebagai validated)
+     * Setujui / Approve pengajuan lembur oleh HRD
      */
-    public function validate(Request $request, $id)
+    public function approve(Request $request, $id)
     {
         $overtime = Overtime::findOrFail($id);
+
+        // Jika HRD menginput ulang jam/kg sebelum disetujui
+        if ($request->filled('hours')) {
+            $overtime->hours = (float) $request->input('hours');
+        }
+        if ($request->filled('kg_amount')) {
+            $overtime->kg_amount = (float) $request->input('kg_amount');
+        }
+
+        $overtime->status = 'approved';
+        $overtime->save();
 
         $result = $this->payrollService->validateOvertime(
             $overtime,
@@ -83,9 +94,36 @@ class OvertimeController extends Controller
         );
 
         if ($result['success']) {
-            return back()->with('success', $result['message']);
+            return back()->with('success', 'Pengajuan lembur berhasil disetujui. ' . $result['message']);
         }
 
         return back()->withErrors(['error' => $result['message']]);
+    }
+
+    /**
+     * Tolak / Reject pengajuan lembur oleh HRD
+     */
+    public function reject(Request $request, $id)
+    {
+        $request->validate([
+            'rejection_reason' => 'nullable|string|max:500',
+        ]);
+
+        $overtime = Overtime::findOrFail($id);
+        $overtime->update([
+            'status'           => 'rejected',
+            'rejection_reason' => $request->input('rejection_reason', 'Pengajuan lembur tidak disetujui oleh HRD.'),
+            'validated_by'     => auth()->user()->id,
+        ]);
+
+        return back()->with('success', 'Pengajuan lembur berhasil ditolak.');
+    }
+
+    /**
+     * Validasi overtime (legacy/alias untuk approve)
+     */
+    public function validate(Request $request, $id)
+    {
+        return $this->approve($request, $id);
     }
 }

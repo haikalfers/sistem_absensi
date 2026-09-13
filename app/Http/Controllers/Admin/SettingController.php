@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Models\{CompanyLocation, WorkSchedule};
+use App\Models\{CompanyLocation, WorkSchedule, Employee};
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -49,7 +49,7 @@ class SettingController extends Controller
      */
     public function schedules()
     {
-        $schedules = WorkSchedule::all();
+        $schedules = WorkSchedule::orderByRaw('division IS NOT NULL ASC')->orderBy('name')->get();
         $daysOfWeek = [
             0 => 'Minggu',
             1 => 'Senin',
@@ -60,9 +60,21 @@ class SettingController extends Controller
             6 => 'Sabtu',
         ];
 
+        // Ambil daftar divisi unik dari karyawan + list divisi populer
+        $existingDivisions = Employee::whereNotNull('division')
+            ->where('division', '!=', '')
+            ->distinct()
+            ->pluck('division')
+            ->toArray();
+
+        $presetDivisions = ['Marketing', 'Produksi', 'Sales', 'IT', 'HR', 'Finance', 'Operasional', 'Logistik'];
+        $divisions = array_unique(array_merge($presetDivisions, $existingDivisions));
+        sort($divisions);
+
         return view('admin.settings.schedules', [
-            'schedules' => $schedules,
+            'schedules'  => $schedules,
             'daysOfWeek' => $daysOfWeek,
+            'divisions'  => $divisions,
         ]);
     }
 
@@ -73,6 +85,7 @@ class SettingController extends Controller
     {
         $validated = $request->validate([
             'schedules.*.name' => 'required|string',
+            'schedules.*.division' => 'nullable|string',
             'schedules.*.working_days' => 'required|array',
             'schedules.*.check_in_time' => 'required|date_format:H:i',
             'schedules.*.check_out_time' => 'required|date_format:H:i',
@@ -83,11 +96,62 @@ class SettingController extends Controller
                 if (isset($data['working_days']) && is_array($data['working_days'])) {
                     $data['working_days'] = array_map('intval', $data['working_days']);
                 }
+                if (isset($data['division']) && trim($data['division']) === '') {
+                    $data['division'] = null;
+                }
                 $schedule = WorkSchedule::findOrFail($schedId);
                 $schedule->update($data);
             }
 
             return back()->with('success', 'Jadwal kerja berhasil diupdate.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Tambah jadwal kerja baru (khusus divisi atau umum)
+     */
+    public function storeSchedule(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'division' => 'nullable|string|max:255',
+            'working_days' => 'required|array',
+            'check_in_time' => 'required|date_format:H:i',
+            'check_out_time' => 'required|date_format:H:i',
+            'late_tolerance_minutes' => 'nullable|integer|min:0',
+        ]);
+
+        try {
+            $workingDays = array_map('intval', $request->input('working_days', []));
+            $division = $request->filled('division') ? trim($request->input('division')) : null;
+
+            WorkSchedule::create([
+                'name' => $request->input('name'),
+                'division' => $division,
+                'working_days' => $workingDays,
+                'check_in_time' => $request->input('check_in_time'),
+                'check_out_time' => $request->input('check_out_time'),
+                'late_tolerance_minutes' => $request->input('late_tolerance_minutes', 0) ?? 0,
+            ]);
+
+            return back()->with('success', 'Jadwal kerja baru berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Hapus jadwal kerja
+     */
+    public function destroySchedule($id)
+    {
+        try {
+            $schedule = WorkSchedule::findOrFail($id);
+            $schedule->delete();
+
+            return back()->with('success', 'Jadwal kerja berhasil dihapus.');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

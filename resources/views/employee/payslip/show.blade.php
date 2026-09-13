@@ -83,7 +83,7 @@
         </div>
         
         <p class="text-center text-[10px] text-gray-400 font-semibold mt-6 italic">
-            Slip gaji digital ini diterbitkan otomatis secara resmi oleh sistem absensi PT. Triliun Anugrah Nusantara. 
+            Slip gaji digital ini diterbitkan otomatis secara resmi oleh sistem absensi PT. Indobismar. 
             Apabila terdapat selisih perhitungan, hubungi departemen HRD/Payroll.
         </p>
     </div>

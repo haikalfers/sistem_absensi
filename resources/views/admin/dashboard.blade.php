@@ -12,10 +12,10 @@
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Total Karyawan</p>
-                    <p class="text-3xl font-extrabold text-[#0a2219] mt-2">{{ $totalEmployees }}</p>
+                    <p class="text-3xl font-extrabold text-[#7f1d1d] mt-2">{{ $totalEmployees }}</p>
                     <p class="text-[10px] text-gray-500 font-semibold mt-1">Aktif terdaftar</p>
                 </div>
-                <div class="w-12 h-12 bg-[#e7f0ec] rounded-xl flex items-center justify-center text-[#0a2219] border border-[#d2dfd8]">
+                <div class="w-12 h-12 bg-red-50 rounded-xl flex items-center justify-center text-[#7f1d1d] border border-red-200">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.109A11.386 11.386 0 0110.089 20.5a11.378 11.378 0 01-4.94-1.263v-.11a11.353 11.353 0 010-3.187m0 4.382v-.003c0-1.113.285-2.16.786-3.07M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm6.375 2.25a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zM13.5 8.25a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z" />
                     </svg>
@@ -97,15 +97,15 @@
         @endif
 
         {{-- Selfie Auto-delete Notice --}}
-        <div class="bg-[#f0f7f3] border border-[#d2dfd8] rounded-2xl p-5 flex items-start gap-4">
-            <div class="w-10 h-10 bg-[#e7f0ec] border border-[#d2dfd8] rounded-xl flex items-center justify-center text-[#0a2219] flex-shrink-0">
+        <div class="bg-red-50/50 border border-red-200/80 rounded-2xl p-5 flex items-start gap-4">
+            <div class="w-10 h-10 bg-red-100/80 border border-red-200 rounded-xl flex items-center justify-center text-[#7f1d1d] flex-shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                 </svg>
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-xs font-extrabold text-[#0a2219] uppercase tracking-wider">Kebijakan Foto Selfie</p>
+                <p class="text-xs font-extrabold text-[#7f1d1d] uppercase tracking-wider">Kebijakan Foto Selfie</p>
                 <p class="text-xs text-gray-600 font-semibold mt-1">
                     Foto selfie absensi PWA disimpan selama <strong>7 hari</strong> sebagai bukti kehadiran, kemudian dihapus otomatis oleh sistem setiap tengah malam.
                     Data absensi (jam, status) tetap tersimpan permanen.
@@ -122,7 +122,7 @@
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Statistik Kehadiran 7 Hari</h3>
-                <span class="text-[10px] font-bold text-[#0a2219] bg-[#e7f0ec] px-2 py-1 rounded-md">Realtime</span>
+                <span class="text-[10px] font-bold text-[#7f1d1d] bg-red-50 px-2 py-1 rounded-md">Realtime</span>
             </div>
             
             <div class="space-y-4">
@@ -189,14 +189,14 @@
         <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-5">Menu Aksi Cepat</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             
-            <a href="{{ route('admin.employees.create') }}" class="group flex items-center p-4 bg-[#e7f0ec] rounded-xl hover:bg-[#d8e7e1] transition duration-150 border border-[#d2dfd8]/50">
-                <div class="w-10 h-10 bg-[#0a2219] text-white rounded-lg flex items-center justify-center mr-3 group-hover:scale-105 transition duration-150">
+            <a href="{{ route('admin.employees.create') }}" class="group flex items-center p-4 bg-red-50/60 rounded-xl hover:bg-red-100/70 transition duration-150 border border-red-200/60">
+                <div class="w-10 h-10 bg-[#7f1d1d] text-white rounded-lg flex items-center justify-center mr-3 group-hover:scale-105 transition duration-150">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                     </svg>
                 </div>
                 <div>
-                    <span class="block text-xs font-bold text-[#0a2219] uppercase tracking-wider">Tambah Karyawan</span>
+                    <span class="block text-xs font-bold text-[#7f1d1d] uppercase tracking-wider">Tambah Karyawan</span>
                     <span class="text-[10px] text-gray-500 font-semibold">Registrasi staf baru</span>
                 </div>
             </a>

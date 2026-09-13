@@ -436,7 +436,7 @@
             <table class="header-table">
                 <tr>
                     <td style="width:70%;">
-                        <div class="company-name">PT. Triliun Anugrah Nusantara</div>
+                        <div class="company-name">PT. Indobismar</div>
                         <div class="company-subtitle">Human Resources &amp; Payroll Department</div>
                     </td>
                     <td style="width:30%;">
@@ -613,7 +613,7 @@
                         <div class="sig-title">Disetujui Oleh</div>
                         <div class="sig-line"></div>
                         <div class="sig-name">HRD / Payroll Manager</div>
-                        <div class="sig-pos">PT. Triliun Anugrah Nusantara</div>
+                        <div class="sig-pos">PT. Indobismar</div>
                     </div>
                 </td>
                 <td>
@@ -634,7 +634,7 @@
 
         {{-- ===== FOOTER ===== --}}
         <div class="footer">
-            <strong>PT. Triliun Anugrah Nusantara</strong> &mdash; Dokumen ini diterbitkan secara otomatis oleh Sistem Absensi
+            <strong>PT. Indobismar</strong> &mdash; Dokumen ini diterbitkan secara otomatis oleh Sistem Absensi
             Karyawan.<br>
             Slip gaji ini sah sebagai bukti pembayaran resmi periode
             <strong>{{ $detail->payroll->period_name }}</strong>.<br>

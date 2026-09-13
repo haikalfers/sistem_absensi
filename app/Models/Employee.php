@@ -56,4 +56,9 @@ class Employee extends Model
     {
         return $this->hasMany(AttendanceRevision::class);
     }
+
+    public function fieldAssignments()
+    {
+        return $this->hasMany(FieldAssignment::class);
+    }
 }

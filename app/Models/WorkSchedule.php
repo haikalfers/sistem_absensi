@@ -11,6 +11,7 @@ class WorkSchedule extends Model
 
     protected $fillable = [
         'name',
+        'division',
         'working_days',
         'check_in_time',
         'check_out_time',

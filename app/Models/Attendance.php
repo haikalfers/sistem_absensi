@@ -28,6 +28,8 @@ class Attendance extends Model
         'ip_address',
         'fake_gps_flags',
         'is_suspect',
+        'is_field_assignment',
+        'field_assignment_id',
     ];
 
     protected $casts = [
@@ -36,11 +38,12 @@ class Attendance extends Model
         'check_out'        => 'datetime:H:i:s',
         'check_in_lat'     => 'decimal:7',
         'check_in_lng'     => 'decimal:7',
-        'is_overtime'      => 'boolean',
-        'gps_accuracy'     => 'decimal:2',
-        'fake_gps_flags'   => 'array',
-        'is_suspect'       => 'boolean',
-        'selfie_expires_at' => 'datetime',
+        'is_overtime'          => 'boolean',
+        'gps_accuracy'         => 'decimal:2',
+        'fake_gps_flags'       => 'array',
+        'is_suspect'           => 'boolean',
+        'selfie_expires_at'    => 'datetime',
+        'is_field_assignment'  => 'boolean',
     ];
 
     // Relasi
@@ -57,6 +60,11 @@ class Attendance extends Model
     public function revisions()
     {
         return $this->hasMany(AttendanceRevision::class);
+    }
+
+    public function fieldAssignment()
+    {
+        return $this->belongsTo(FieldAssignment::class);
     }
 
     /**

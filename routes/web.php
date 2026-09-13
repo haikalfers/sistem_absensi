@@ -55,6 +55,16 @@ Route::middleware('auth')->group(function () {
             Route::get('/{id}/edit', [Admin\OvertimeController::class, 'edit'])->name('edit');
             Route::put('/{id}', [Admin\OvertimeController::class, 'update'])->name('update');
             Route::put('/{id}/validate', [Admin\OvertimeController::class, 'validate'])->name('validate');
+            Route::put('/{id}/approve', [Admin\OvertimeController::class, 'approve'])->name('approve');
+            Route::put('/{id}/reject', [Admin\OvertimeController::class, 'reject'])->name('reject');
+        });
+
+        // Dinas Luar
+        Route::prefix('field-assignments')->name('field-assignments.')->group(function () {
+            Route::get('/', [Admin\FieldAssignmentController::class, 'index'])->name('index');
+            Route::get('/create', [Admin\FieldAssignmentController::class, 'create'])->name('create');
+            Route::post('/', [Admin\FieldAssignmentController::class, 'store'])->name('store');
+            Route::delete('/{id}', [Admin\FieldAssignmentController::class, 'destroy'])->name('destroy');
         });
 
         // Cuti & Izin
@@ -103,6 +113,8 @@ Route::middleware('auth')->group(function () {
             Route::post('/locations', [Admin\SettingController::class, 'updateLocations'])->name('locations.update');
             Route::get('/schedules', [Admin\SettingController::class, 'schedules'])->name('schedules');
             Route::post('/schedules', [Admin\SettingController::class, 'updateSchedules'])->name('schedules.update');
+            Route::post('/schedules/store', [Admin\SettingController::class, 'storeSchedule'])->name('schedules.store');
+            Route::delete('/schedules/{id}', [Admin\SettingController::class, 'destroySchedule'])->name('schedules.destroy');
             // Pengaturan Penggajian (BPJS & Potongan)
             Route::get('/payroll', [PayrollSettingController::class, 'index'])->name('payroll');
             Route::post('/payroll', [PayrollSettingController::class, 'update'])->name('payroll.update');
@@ -141,6 +153,14 @@ Route::middleware('auth')->group(function () {
             Route::get('/create', [Employee\AttendanceRevisionController::class, 'create'])->name('create');
             Route::post('/', [Employee\AttendanceRevisionController::class, 'store'])->name('store');
             Route::delete('/{id}', [Employee\AttendanceRevisionController::class, 'destroy'])->name('destroy');
+        });
+
+        // Pengajuan Lembur Mandiri
+        Route::prefix('overtime')->name('overtime.')->group(function () {
+            Route::get('/', [Employee\OvertimeController::class, 'index'])->name('index');
+            Route::get('/create', [Employee\OvertimeController::class, 'create'])->name('create');
+            Route::post('/', [Employee\OvertimeController::class, 'store'])->name('store');
+            Route::delete('/{id}', [Employee\OvertimeController::class, 'destroy'])->name('destroy');
         });
 
         // Payslip & Penggajian

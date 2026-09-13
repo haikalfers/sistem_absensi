@@ -8,9 +8,9 @@
         <h2 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-4">Status Hari Ini</h2>
         <div class="grid grid-cols-2 gap-4">
             <!-- Status Kehadiran -->
-            <div class="bg-[#e7f0ec] p-4 rounded-xl border border-[#d2dfd8]">
-                <p class="text-[10px] font-bold text-[#0a2219] uppercase tracking-wider">Status Absensi</p>
-                <p class="text-lg font-extrabold text-[#0a2219] mt-1.5">
+            <div class="bg-red-50/60 p-4 rounded-xl border border-red-200/80">
+                <p class="text-[10px] font-bold text-[#7f1d1d] uppercase tracking-wider">Status Absensi</p>
+                <p class="text-lg font-extrabold text-[#7f1d1d] mt-1.5">
                     @if ($stats['status_hari_ini'] === 'on_time')
                         ✓ Tepat Waktu
                     @elseif ($stats['status_hari_ini'] === 'late')
@@ -30,40 +30,48 @@
         </div>
     </div>
 
-    <!-- Quick Check-in/out -->
-    @if (!$attendanceToday || !$attendanceToday->check_in)
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-5">
-            <h2 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-4">Pencatatan Masuk</h2>
-            <button onclick="checkIn()" class="w-full bg-gradient-to-r from-[#0a2219] to-[#123b2c] hover:from-[#123b2c] hover:to-[#0a2219] text-white py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider transition duration-200 shadow-md shadow-emerald-950/10">
-                📍 Absen Masuk
-            </button>
+    <!-- Information Presensi Hari Ini -->
+    <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-5">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest">Pencatatan Presensi Hari Ini</h2>
+            <a href="{{ route('employee.attendance.index') }}" class="text-xs font-bold text-[#7f1d1d] hover:text-red-700 transition flex items-center gap-1">
+                Halaman Absensi →
+            </a>
         </div>
-    @elseif (!$attendanceToday->check_out)
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-5">
-            <h2 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-4">Pencatatan Keluar</h2>
-            <div class="bg-[#e7f0ec]/40 p-4 rounded-xl border border-[#d2dfd8] mb-4 text-xs font-semibold text-gray-700 flex justify-between items-center">
-                <span>Jam Absen Masuk Anda:</span>
-                <span class="text-sm font-extrabold text-[#0a2219] bg-[#e7f0ec] px-3 py-1 rounded-lg border border-[#d2dfd8]">{{ $attendanceToday->check_in->format('H:i') }} WIB</span>
+
+        @if (!$attendanceToday || !$attendanceToday->check_in)
+            <div class="bg-gray-50 border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                    <p class="text-xs font-bold text-gray-800">Anda Belum Absen Masuk Hari Ini</p>
+                    <p class="text-[10px] text-gray-400 mt-0.5">Buka halaman Absensi untuk scan lokasi GPS & foto selfie</p>
+                </div>
+                <a href="{{ route('employee.attendance.index') }}" class="w-full sm:w-auto text-center bg-[#7f1d1d] hover:bg-[#991b1b] text-white text-xs font-bold px-4 py-2.5 rounded-xl uppercase tracking-wider transition shadow-sm border border-[#450a0a]">
+                    📍 Ke Halaman Absensi
+                </a>
             </div>
-            <button onclick="checkOut()" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-600 text-white py-3.5 rounded-xl font-bold text-sm uppercase tracking-wider transition duration-200 shadow-md shadow-red-950/10">
-                📍 Absen Keluar
-            </button>
-        </div>
-    @else
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-5">
-            <h2 class="text-xs font-extrabold text-gray-400 uppercase tracking-widest mb-4">Pencatatan Hari Ini Selesai</h2>
+        @elseif (!$attendanceToday->check_out)
+            <div class="bg-red-50/60 border border-red-200/80 rounded-xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                <div>
+                    <p class="text-xs font-bold text-[#7f1d1d]">Jam Absen Masuk: <span class="font-extrabold text-emerald-800">{{ $attendanceToday->check_in->format('H:i') }} WIB</span></p>
+                    <p class="text-[10px] text-gray-500 mt-0.5">Buka halaman Absensi untuk melakukan absen keluar saat jam kerja selesai</p>
+                </div>
+                <a href="{{ route('employee.attendance.index') }}" class="w-full sm:w-auto text-center bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-2.5 rounded-xl uppercase tracking-wider transition shadow-sm">
+                    📍 Ke Halaman Absensi (Absen Keluar)
+                </a>
+            </div>
+        @else
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-[#e7f0ec] p-3 rounded-xl border border-[#d2dfd8] text-center">
-                    <p class="text-[9px] text-[#0a2219] font-bold uppercase tracking-wider mb-1">Jam Masuk</p>
-                    <p class="text-base font-extrabold text-[#0a2219]">{{ $attendanceToday->check_in->format('H:i') }}</p>
+                <div class="bg-red-50/60 p-3.5 rounded-xl border border-red-200/80 text-center">
+                    <p class="text-[9px] text-[#7f1d1d] font-bold uppercase tracking-wider mb-1">Jam Masuk</p>
+                    <p class="text-base font-extrabold text-[#7f1d1d]">{{ $attendanceToday->check_in->format('H:i') }} WIB</p>
                 </div>
-                <div class="bg-red-50 p-3 rounded-xl border border-red-100 text-center">
+                <div class="bg-red-50 p-3.5 rounded-xl border border-red-100 text-center">
                     <p class="text-[9px] text-red-700 font-bold uppercase tracking-wider mb-1">Jam Keluar</p>
-                    <p class="text-base font-extrabold text-red-700">{{ $attendanceToday->check_out->format('H:i') }}</p>
+                    <p class="text-base font-extrabold text-red-700">{{ $attendanceToday->check_out->format('H:i') }} WIB</p>
                 </div>
             </div>
-        </div>
-    @endif
+        @endif
+    </div>
 
     <!-- Statistics This Month -->
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-5">
@@ -81,9 +89,9 @@
             <div class="flex items-center justify-between text-xs font-bold text-gray-700">
                 <span class="w-16">⚠ Lambat</span>
                 <div class="flex-1 mx-4 bg-gray-50 rounded-full h-2.5 overflow-hidden border border-gray-100">
-                    <div class="bg-[#d4af37] h-full rounded-full" style="width: {{ ($stats['terlambat_bulan_ini'] / 22) * 100 }}%"></div>
+                    <div class="bg-amber-400 h-full rounded-full" style="width: {{ ($stats['terlambat_bulan_ini'] / 22) * 100 }}%"></div>
                 </div>
-                <span class="text-[#8a6d1c] w-6 text-right">{{ $stats['terlambat_bulan_ini'] }}</span>
+                <span class="text-amber-600 w-6 text-right">{{ $stats['terlambat_bulan_ini'] }}</span>
             </div>
             <!-- Alpha -->
             <div class="flex items-center justify-between text-xs font-bold text-gray-700">
@@ -105,7 +113,7 @@
                 </svg>
                 <span>📋 {{ $pendingLeaveRequests }} pengajuan cuti Anda sedang ditinjau.</span>
             </div>
-            <a href="{{ route('employee.leave-requests.index') }}" class="text-xs font-extrabold uppercase tracking-wider text-[#0a2219] hover:text-[#123b2c] shrink-0">
+            <a href="{{ route('employee.leave-requests.index') }}" class="text-xs font-extrabold uppercase tracking-wider text-[#7f1d1d] hover:text-[#991b1b] shrink-0">
                 Lihat Detail →
             </a>
         </div>
@@ -137,7 +145,7 @@
             </div>
             
             <div class="mt-4 text-right">
-                <a href="{{ route('employee.payslip.show', $latestPayslip->id) }}" class="inline-flex items-center text-xs font-bold text-[#0a2219] hover:text-[#d4af37] uppercase tracking-wider transition">
+                <a href="{{ route('employee.payslip.show', $latestPayslip->id) }}" class="inline-flex items-center text-xs font-bold text-[#7f1d1d] hover:text-red-700 uppercase tracking-wider transition">
                     Rincian & Slip PDF
                     <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -146,125 +154,4 @@
             </div>
         </div>
     @endif
-@endsection
-
-@section('js')
-    <script>
-        let userLat = null, userLng = null;
-
-        // Get GPS Location
-        if (navigator.geolocation) {
-            navigator.geolocation.watchPosition(
-                pos => {
-                    userLat = pos.coords.latitude;
-                    userLng = pos.coords.longitude;
-                },
-                err => console.error('GPS Error:', err),
-                { enableHighAccuracy: true, maximumAge: 10000 }
-            );
-        }
-
-        async function checkIn() {
-            if (!userLat || !userLng) {
-                Swal.fire({
-                    title: 'Gagal!',
-                    text: 'GPS tidak terdeteksi. Pastikan izin lokasi HP Anda aktif.',
-                    icon: 'warning',
-                    confirmButtonColor: '#0a2219',
-                    borderRadius: '1rem'
-                });
-                return;
-            }
-
-            try {
-                const response = await fetch('{{ route("employee.attendance.check-in") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        latitude: userLat,
-                        longitude: userLng
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Berhasil!',
-                        text: data.message,
-                        icon: 'success',
-                        confirmButtonColor: '#0a2219',
-                        borderRadius: '1rem'
-                    }).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: data.message,
-                        icon: 'error',
-                        confirmButtonColor: '#0a2219',
-                        borderRadius: '1rem'
-                    });
-                }
-            } catch (error) {
-                Swal.fire({
-                    title: 'Terjadi Kesalahan!',
-                    text: error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#0a2219',
-                    borderRadius: '1rem'
-                });
-            }
-        }
-
-        async function checkOut() {
-            try {
-                const response = await fetch('{{ route("employee.attendance.check-out") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({
-                        latitude: userLat || 0,
-                        longitude: userLng || 0
-                    })
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    Swal.fire({
-                        title: 'Berhasil!',
-                        text: data.message,
-                        icon: 'success',
-                        confirmButtonColor: '#0a2219',
-                        borderRadius: '1rem'
-                    }).then(() => {
-                        location.reload();
-                    });
-                } else {
-                    Swal.fire({
-                        title: 'Gagal!',
-                        text: data.message,
-                        icon: 'error',
-                        confirmButtonColor: '#0a2219',
-                        borderRadius: '1rem'
-                    });
-                }
-            } catch (error) {
-                Swal.fire({
-                    title: 'Terjadi Kesalahan!',
-                    text: error.message,
-                    icon: 'error',
-                    confirmButtonColor: '#0a2219',
-                    borderRadius: '1rem'
-                });
-            }
-        }
-    </script>
 @endsection

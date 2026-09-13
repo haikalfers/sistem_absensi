@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Employee;
 
-use App\Models\{Attendance, CompanyLocation};
+use App\Models\{Attendance, CompanyLocation, FieldAssignment};
 use App\Services\AttendanceService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -27,10 +27,16 @@ class AttendanceController extends Controller
 
         $office = CompanyLocation::first();
 
+        // Cek jadwal dinas luar hari ini
+        $fieldAssignment = FieldAssignment::where('employee_id', $employee->id)
+            ->whereDate('date', $today)
+            ->first();
+
         return view('employee.attendance.index', [
-            'employee' => $employee,
+            'employee'        => $employee,
             'attendanceToday' => $attendanceToday,
-            'office' => $office,
+            'office'          => $office,
+            'fieldAssignment' => $fieldAssignment,
         ]);
     }
 

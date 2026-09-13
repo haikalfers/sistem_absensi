@@ -279,6 +279,11 @@
                                     @else
                                         <span class="inline-flex items-center px-2.5 py-1 bg-red-500/10 text-red-700 text-xs font-extrabold rounded-lg border border-red-500/20 uppercase tracking-wider">Mangkir / Alpha</span>
                                     @endif
+                                    @if ($attendance->is_field_assignment)
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-100 text-blue-700 text-[10px] font-extrabold rounded-md border border-blue-300 uppercase tracking-wider">
+                                            📍 Dinas Luar
+                                        </span>
+                                    @endif
                                     @if ($attendance->is_suspect)
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-amber-100 text-amber-700 text-[10px] font-extrabold rounded-md border border-amber-300 uppercase tracking-wider">
                                             ⚠️ GPS Suspect

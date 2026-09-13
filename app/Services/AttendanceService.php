@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\{Attendance, Employee, CompanyLocation, WorkSchedule, Overtime};
+use App\Models\{Attendance, Employee, CompanyLocation, WorkSchedule, Overtime, FieldAssignment};
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -51,9 +51,16 @@ class AttendanceService
                 ];
             }
 
-            // Validasi GPS Radius (hanya untuk PWA)
+            // ===== CEK DINAS LUAR =====
+            // Jika karyawan punya jadwal dinas luar aktif hari ini, bypass validasi GPS radius
+            $fieldAssignment = FieldAssignment::where('employee_id', $employeeId)
+                ->whereDate('date', $today)
+                ->first();
+            $isFieldAssignment = $fieldAssignment !== null;
+
+            // Validasi GPS Radius (hanya untuk PWA & BUKAN dinas luar)
             $office = null;
-            if ($source === 'pwa') {
+            if ($source === 'pwa' && !$isFieldAssignment) {
                 $office = CompanyLocation::first();
 
                 if (!$office) {
@@ -81,7 +88,7 @@ class AttendanceService
             }
 
             // Tentukan jadwal kerja hari ini
-            $schedule = $this->getScheduleForDay($now->dayOfWeek);
+            $schedule = $this->getScheduleForEmployeeAndDay($employee, $now->dayOfWeek);
             if (!$schedule) {
                 return [
                     'success' => false,
@@ -113,17 +120,19 @@ class AttendanceService
             $attendance = Attendance::updateOrCreate(
                 ['employee_id' => $employeeId, 'date' => $today],
                 [
-                    'check_in'          => $now->toTimeString(),
-                    'check_in_lat'      => $lat,
-                    'check_in_lng'      => $lng,
-                    'source'            => $source,
-                    'status'            => $status,
-                    'selfie_photo'      => $selfiePathRel,
-                    'selfie_expires_at' => $selfieExpiresAt,
-                    'gps_accuracy'      => $gpsAccuracy,
-                    'ip_address'        => $ipAddress,
-                    'fake_gps_flags'    => $fakeGpsResult['flags'] ?: null,
-                    'is_suspect'        => $fakeGpsResult['is_suspect'],
+                    'check_in'              => $now->toTimeString(),
+                    'check_in_lat'          => $lat,
+                    'check_in_lng'          => $lng,
+                    'source'                => $source,
+                    'status'                => $status,
+                    'selfie_photo'          => $selfiePathRel,
+                    'selfie_expires_at'     => $selfieExpiresAt,
+                    'gps_accuracy'          => $gpsAccuracy,
+                    'ip_address'            => $ipAddress,
+                    'fake_gps_flags'        => $fakeGpsResult['flags'] ?: null,
+                    'is_suspect'            => $fakeGpsResult['is_suspect'],
+                    'is_field_assignment'   => $isFieldAssignment,
+                    'field_assignment_id'   => $fieldAssignment?->id,
                 ]
             );
 
@@ -143,13 +152,20 @@ class AttendanceService
                 'has_selfie'    => !is_null($selfiePathRel),
             ]);
 
+            // Pesan khusus jika dinas luar
+            $fieldNote = $isFieldAssignment
+                ? ' 🗺️ Absen dinas luar di: ' . ($fieldAssignment->location_name ?? 'Lokasi Penugasan') . '.'
+                : '';
+
             return [
-                'success'    => true,
-                'message'    => "Absen masuk berhasil. Status: {$statusLabel}.{$suspectNote}",
-                'code'       => 'CHECK_IN_SUCCESS',
-                'attendance' => $attendance,
-                'status'     => $status,
-                'is_suspect' => $fakeGpsResult['is_suspect'],
+                'success'            => true,
+                'message'            => "Absen masuk berhasil. Status: {$statusLabel}.{$suspectNote}{$fieldNote}",
+                'code'               => 'CHECK_IN_SUCCESS',
+                'attendance'         => $attendance,
+                'status'             => $status,
+                'is_suspect'         => $fakeGpsResult['is_suspect'],
+                'is_field_assignment'=> $isFieldAssignment,
+                'field_assignment'   => $fieldAssignment,
             ];
         } catch (\Exception $e) {
             Log::error('Check-in Error', [
@@ -202,22 +218,14 @@ class AttendanceService
 
             $attendance->update(['check_out' => $now->toTimeString()]);
 
-            // Hitung Lembur Otomatis
-            $checkInTime  = Carbon::parse($attendance->date->toDateString() . ' ' . $attendance->check_in);
-            $overtimeHours = $this->calculateOvertimeHours($checkInTime, $now);
+            // Hubungkan dengan pengajuan lembur yang telah disetujui HRD
+            $approvedOvertime = Overtime::where('employee_id', $employeeId)
+                ->whereDate('date', $today)
+                ->where('status', 'approved')
+                ->first();
 
-            if ($overtimeHours > 0) {
-                Overtime::updateOrCreate(
-                    [
-                        'attendance_id' => $attendance->id,
-                        'employee_id'   => $employeeId,
-                        'date'          => $today,
-                    ],
-                    [
-                        'type'  => $this->determineOvertimeType($employee),
-                        'hours' => $overtimeHours,
-                    ]
-                );
+            if ($approvedOvertime) {
+                $approvedOvertime->update(['attendance_id' => $attendance->id]);
             }
 
             Log::info('Check-out Success', [
@@ -279,13 +287,50 @@ class AttendanceService
     }
 
     /**
-     * Ambil jadwal kerja untuk hari tertentu
+     * Ambil jadwal kerja untuk karyawan dan hari tertentu
+     * dayOfWeek: 0=Minggu, 1=Senin, ..., 6=Sabtu
+     * Memprioritaskan jadwal kerja khusus divisi jika ada.
+     */
+    public function getScheduleForEmployeeAndDay(Employee $employee, int $dayOfWeek): ?WorkSchedule
+    {
+        // 1. Cari jadwal khusus divisi karyawan jika ada
+        if (!empty($employee->division)) {
+            $divisionSchedule = WorkSchedule::whereRaw('LOWER(division) = ?', [strtolower(trim($employee->division))])
+                ->where(function ($q) use ($dayOfWeek) {
+                    $q->whereJsonContains('working_days', $dayOfWeek)
+                      ->orWhereJsonContains('working_days', (string) $dayOfWeek);
+                })
+                ->first();
+
+            if ($divisionSchedule) {
+                return $divisionSchedule;
+            }
+        }
+
+        // 2. Fallback ke jadwal umum (division NULL atau string kosong)
+        return WorkSchedule::where(function ($q) {
+                $q->whereNull('division')->orWhere('division', '');
+            })
+            ->where(function ($q) use ($dayOfWeek) {
+                $q->whereJsonContains('working_days', $dayOfWeek)
+                  ->orWhereJsonContains('working_days', (string) $dayOfWeek);
+            })
+            ->first();
+    }
+
+    /**
+     * Ambil jadwal kerja untuk hari tertentu (jadwal umum)
      * dayOfWeek: 0=Minggu, 1=Senin, ..., 6=Sabtu
      */
-    private function getScheduleForDay(int $dayOfWeek): ?WorkSchedule
+    public function getScheduleForDay(int $dayOfWeek): ?WorkSchedule
     {
-        return WorkSchedule::whereJsonContains('working_days', $dayOfWeek)
-            ->orWhereJsonContains('working_days', (string) $dayOfWeek)
+        return WorkSchedule::where(function ($q) {
+                $q->whereNull('division')->orWhere('division', '');
+            })
+            ->where(function ($q) use ($dayOfWeek) {
+                $q->whereJsonContains('working_days', $dayOfWeek)
+                  ->orWhereJsonContains('working_days', (string) $dayOfWeek);
+            })
             ->first();
     }
 

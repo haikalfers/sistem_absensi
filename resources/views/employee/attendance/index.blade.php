@@ -24,6 +24,27 @@
 @endsection
 
 @section('content')
+    {{-- Banner Dinas Luar (muncul jika ada jadwal dinas luar hari ini) --}}
+    @if (isset($fieldAssignment) && $fieldAssignment)
+        <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-2xl p-5 mb-5 border border-blue-500/30 shadow-md">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0 text-xl">
+                    🗺️
+                </div>
+                <div class="flex-1">
+                    <p class="text-xs font-extrabold text-blue-100 uppercase tracking-widest mb-1">Jadwal Dinas Luar Hari Ini</p>
+                    <p class="text-base font-extrabold text-white">{{ $fieldAssignment->location_name }}</p>
+                    @if ($fieldAssignment->notes)
+                        <p class="text-xs text-blue-100 mt-1 font-medium leading-relaxed">{{ $fieldAssignment->notes }}</p>
+                    @endif
+                    <div class="mt-3 bg-white/15 rounded-xl px-3 py-2 text-xs font-bold text-white border border-white/20">
+                        ✅ Anda terdaftar dinas luar. Absen dapat dilakukan dari lokasi penugasan tanpa batasan radius.
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Status Waktu Server --}}
     <div class="bg-gradient-to-br from-[#0a2219] to-[#123b2c] text-white rounded-2xl p-6 mb-5 border border-[#1d523e] shadow-sm flex flex-col items-center text-center">
         <h2 class="text-xs font-extrabold text-[#d4af37] uppercase tracking-widest mb-1.5">Waktu Server Realtime</h2>

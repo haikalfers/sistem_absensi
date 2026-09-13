@@ -47,7 +47,7 @@ class LeaveRequestController extends Controller
     {
         $validated = $request->validate([
             'leave_type_id' => 'required|exists:leave_types,id',
-            'start_date' => 'required|date|after_or_equal:today',
+            'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'reason' => 'required|string|max:500',
             'document' => 'nullable|mimes:pdf,jpg,png|max:5120',
@@ -57,15 +57,34 @@ class LeaveRequestController extends Controller
             $employee = auth()->user()->employee;
             $leaveType = LeaveType::findOrFail($validated['leave_type_id']);
 
-            // Hitung total hari (exclude hari Minggu)
+            // Validasi H-2 minggu (14 hari) HANYA untuk Cuti Tahunan
+            $startDateParsed = Carbon::parse($validated['start_date']);
+
+            if (strcasecmp($leaveType->name, 'Cuti Tahunan') === 0) {
+                $minDateH14 = Carbon::today()->addDays(14);
+                if ($startDateParsed->lt($minDateH14)) {
+                    $formattedMinDate = $minDateH14->translatedFormat('d F Y');
+                    return back()->withInput()->withErrors([
+                        'start_date' => "Pengajuan Cuti Tahunan wajib dilakukan minimal H-2 minggu (14 hari) sebelum tanggal mulai (paling awal tanggal {$formattedMinDate})."
+                    ]);
+                }
+            } else {
+                if ($startDateParsed->lt(Carbon::today())) {
+                    return back()->withInput()->withErrors([
+                        'start_date' => 'Tanggal mulai pengajuan izin/cuti tidak boleh sebelum hari ini.'
+                    ]);
+                }
+            }
+
+            // Hitung total hari (Cuti Melahirkan dihitung hari kalender, lainnya exclude Minggu)
             $startDate = Carbon::parse($validated['start_date']);
             $endDate = Carbon::parse($validated['end_date']);
+            $isCalendarDays = str_contains(strtolower($leaveType->name), 'melahirkan');
             $totalDays = 0;
 
             $current = $startDate->copy();
             while ($current <= $endDate) {
-                // 0 = Minggu, jadi skip
-                if ($current->dayOfWeek !== 0) {
+                if ($isCalendarDays || $current->dayOfWeek !== 0) {
                     $totalDays++;
                 }
                 $current->addDay();

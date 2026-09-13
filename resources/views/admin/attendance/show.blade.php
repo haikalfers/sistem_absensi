@@ -52,13 +52,20 @@
                 <div class="mt-4 grid grid-cols-2 gap-4 text-xs">
                     <div>
                         <p class="font-bold text-gray-400 uppercase tracking-wider text-[10px] mb-1">Status Ketepatan</p>
-                        @if ($attendance->status === 'on_time')
-                            <span class="inline-flex items-center px-2.5 py-1 bg-emerald-500/10 text-emerald-700 font-extrabold rounded-lg border border-emerald-500/20 uppercase tracking-wider">Tepat Waktu</span>
-                        @elseif ($attendance->status === 'late')
-                            <span class="inline-flex items-center px-2.5 py-1 bg-amber-500/10 text-amber-700 font-extrabold rounded-lg border border-amber-500/20 uppercase tracking-wider">Terlambat</span>
-                        @else
-                            <span class="inline-flex items-center px-2.5 py-1 bg-red-500/10 text-red-700 font-extrabold rounded-lg border border-red-500/20 uppercase tracking-wider">Mangkir / Alpha</span>
-                        @endif
+                        <div class="flex flex-wrap gap-1 items-center">
+                            @if ($attendance->status === 'on_time')
+                                <span class="inline-flex items-center px-2.5 py-1 bg-emerald-500/10 text-emerald-700 font-extrabold rounded-lg border border-emerald-500/20 uppercase tracking-wider">Tepat Waktu</span>
+                            @elseif ($attendance->status === 'late')
+                                <span class="inline-flex items-center px-2.5 py-1 bg-amber-500/10 text-amber-700 font-extrabold rounded-lg border border-amber-500/20 uppercase tracking-wider">Terlambat</span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-1 bg-red-500/10 text-red-700 font-extrabold rounded-lg border border-red-500/20 uppercase tracking-wider">Mangkir / Alpha</span>
+                            @endif
+                            @if ($attendance->is_field_assignment)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 text-blue-700 font-extrabold rounded-lg border border-blue-300 uppercase tracking-wider text-xs">
+                                    📍 Dinas Luar
+                                </span>
+                            @endif
+                        </div>
                     </div>
                     <div>
                         <p class="font-bold text-gray-400 uppercase tracking-wider text-[10px] mb-1">Metode Absensi</p>
@@ -116,6 +123,42 @@
                     Buka di Google Maps
                 </a>
             </div>
+            @endif
+
+            {{-- ===== INFORMASI DINAS LUAR ===== --}}
+            @if ($attendance->is_field_assignment || $attendance->fieldAssignment)
+                <div class="bg-white rounded-2xl border border-blue-200 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-xs font-extrabold text-blue-800 uppercase tracking-widest flex items-center gap-1.5">
+                            📍 Informasi Dinas Luar
+                        </h3>
+                        <span class="inline-flex items-center px-2.5 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-extrabold rounded-md border border-blue-200 uppercase tracking-wider">
+                            Penugasan Resmi HR
+                        </span>
+                    </div>
+                    @if ($attendance->fieldAssignment)
+                        <div class="space-y-2 text-xs font-semibold text-gray-700">
+                            <div>
+                                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Lokasi / Klien</span>
+                                <p class="text-sm font-extrabold text-gray-800">{{ $attendance->fieldAssignment->location_name }}</p>
+                            </div>
+                            @if ($attendance->fieldAssignment->address)
+                                <div>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Alamat Tugas</span>
+                                    <p class="text-xs text-gray-600">{{ $attendance->fieldAssignment->address }}</p>
+                                </div>
+                            @endif
+                            @if ($attendance->fieldAssignment->notes)
+                                <div>
+                                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Catatan Penugasan</span>
+                                    <p class="text-xs text-gray-600">{{ $attendance->fieldAssignment->notes }}</p>
+                                </div>
+                            @endif
+                        </div>
+                    @else
+                        <p class="text-xs text-blue-700 font-semibold">Absensi ini dicatat dengan status Penugasan Dinas Luar.</p>
+                    @endif
+                </div>
             @endif
 
             {{-- ===== FAKE GPS DETECTION RESULT ===== --}}

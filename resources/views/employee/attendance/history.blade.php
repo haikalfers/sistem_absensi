@@ -51,19 +51,26 @@
             <div class="flex justify-between items-center mb-3">
                 <span class="text-sm font-bold text-gray-800">{{ \Carbon\Carbon::parse($att->date)->format('d M Y') }}</span>
                 
-                @if($att->status === 'on_time')
-                    <span class="inline-flex items-center px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-extrabold rounded-lg border border-emerald-100 uppercase tracking-wider">
-                        Tepat Waktu
-                    </span>
-                @elseif($att->status === 'late')
-                    <span class="inline-flex items-center px-2.5 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-extrabold rounded-lg border border-amber-100 uppercase tracking-wider">
-                        Terlambat
-                    </span>
-                @else
-                    <span class="inline-flex items-center px-2.5 py-0.5 bg-red-50 text-red-700 text-[10px] font-extrabold rounded-lg border border-red-100 uppercase tracking-wider">
-                        Mangkir
-                    </span>
-                @endif
+                <div class="flex items-center gap-1.5">
+                    @if($att->is_field_assignment)
+                        <span class="inline-flex items-center px-2 py-0.5 bg-blue-50 text-blue-700 text-[10px] font-extrabold rounded-lg border border-blue-100 uppercase tracking-wider">
+                            📍 Dinas Luar
+                        </span>
+                    @endif
+                    @if($att->status === 'on_time')
+                        <span class="inline-flex items-center px-2.5 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-extrabold rounded-lg border border-emerald-100 uppercase tracking-wider">
+                            Tepat Waktu
+                        </span>
+                    @elseif($att->status === 'late')
+                        <span class="inline-flex items-center px-2.5 py-0.5 bg-amber-50 text-amber-700 text-[10px] font-extrabold rounded-lg border border-amber-100 uppercase tracking-wider">
+                            Terlambat
+                        </span>
+                    @else
+                        <span class="inline-flex items-center px-2.5 py-0.5 bg-red-50 text-red-700 text-[10px] font-extrabold rounded-lg border border-red-100 uppercase tracking-wider">
+                            Mangkir
+                        </span>
+                    @endif
+                </div>
             </div>
             
             <div class="grid grid-cols-2 gap-4 text-xs font-bold text-gray-600 pt-3 border-t border-gray-50">
