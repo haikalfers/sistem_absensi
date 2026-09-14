@@ -14,6 +14,7 @@
     <link rel="manifest" href="/manifest.json">
     <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
     
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @yield('css')
 </head>
@@ -104,6 +105,8 @@
     <!-- Content Area -->
     <main class="pb-24 pt-4">
         <div class="p-4 max-w-2xl mx-auto">
+            <x-attendance-warning-banner />
+
             <!-- Flash Messages -->
             @if ($message = Session::get('success'))
                 <div class="mb-5 p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl flex items-center shadow-sm">
@@ -258,6 +261,10 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        window.VAPID_PUBLIC_KEY = "{{ config('webpush.vapid.public_key') }}";
+    </script>
+    <script src="/js/webpush-client.js" defer></script>
     @yield('js')
 </body>
 </html>

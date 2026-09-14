@@ -23,6 +23,10 @@ Route::get('/offline', fn() => view('offline'))->name('offline');
 // ============================================
 
 Route::middleware('auth')->group(function () {
+    // WebPush Subscriptions
+    Route::post('/push-subscriptions', [\App\Http\Controllers\PushSubscriptionController::class, 'store'])->name('push-subscriptions.store');
+    Route::post('/push-subscriptions/delete', [\App\Http\Controllers\PushSubscriptionController::class, 'destroy'])->name('push-subscriptions.destroy');
+
     // Dashboard redirect berdasarkan role
     Route::get('/dashboard', function () {
         if (auth()->user()->isAdmin()) {

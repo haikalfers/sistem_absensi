@@ -172,7 +172,7 @@
 </div>
 
 <!-- Modal Reject -->
-<div id="modal-reject" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+<div id="modal-reject" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-gray-100">
         <div class="flex items-center justify-between pb-4 border-b">
             <h3 class="text-base font-extrabold text-gray-800">Tolak Pengajuan Lembur</h3>
@@ -208,8 +208,13 @@
     function toggleModal(id, show) {
         const modal = document.getElementById(id);
         if (modal) {
-            if (show) modal.classList.remove('hidden');
-            else modal.classList.add('hidden');
+            if (show) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            } else {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
         }
     }
 
