@@ -520,20 +520,7 @@
         </table>
 
         {{-- ===== EARNINGS ===== --}}
-        @php
-            $grossSalary =
-                ($detail->base_salary ?? 0) +
-                ($detail->meal_allowance ?? 0) +
-                ($detail->overtime_total ?? 0) +
-                ($detail->kpi_bonus ?? 0);
-            $totalDeductions =
-                ($detail->bpjs_tk_deduction ?? 0) +
-                ($detail->bpjs_kes_deduction ?? 0) +
-                ($detail->pph21_deduction ?? 0) +
-                ($detail->other_deduction ?? 0);
-        @endphp
-
-        <div class="section-header earnings">&#9650; Penerimaan (Earnings)</div>
+        <div class="section-header earnings">&#9650; Pendapatan (Penghasilan)</div>
         <div class="table-wrapper">
             <table class="salary-table">
                 <tr class="item">
@@ -541,42 +528,88 @@
                     <td class="amount">Rp {{ number_format($detail->base_salary ?? 0, 0, ',', '.') }}</td>
                 </tr>
                 <tr class="item">
-                    <td>Tunjangan Uang Makan</td>
-                    <td class="amount">Rp {{ number_format($detail->meal_allowance ?? 0, 0, ',', '.') }}</td>
+                    <td>BPJS JHTP (Jaminan Hari Tua - ditanggung perusahaan)</td>
+                    <td class="amount">Rp {{ number_format($detail->bpjs_jht_company ?? 0, 0, ',', '.') }}</td>
                 </tr>
                 <tr class="item">
-                    <td>Overtime / Lembur</td>
-                    <td class="amount">Rp {{ number_format($detail->overtime_total ?? 0, 0, ',', '.') }}</td>
+                    <td>BPJS JKK (Jaminan Kecelakaan Kerja - ditanggung perusahaan)</td>
+                    <td class="amount">Rp {{ number_format($detail->bpjs_jkk_income ?? 0, 0, ',', '.') }}</td>
                 </tr>
                 <tr class="item">
-                    <td>Bonus KPI</td>
-                    <td class="amount">Rp {{ number_format($detail->kpi_bonus ?? 0, 0, ',', '.') }}</td>
+                    <td>BPJS JKM (Jaminan Kematian - ditanggung perusahaan)</td>
+                    <td class="amount">Rp {{ number_format($detail->bpjs_jkm_income ?? 0, 0, ',', '.') }}</td>
                 </tr>
+                <tr class="item">
+                    <td>BPJS JKN P (Jaminan Kesehatan Nasional - ditanggung perusahaan)</td>
+                    <td class="amount">Rp {{ number_format($detail->bpjs_jkn_company ?? 0, 0, ',', '.') }}</td>
+                </tr>
+                <tr class="item">
+                    <td>JP Perusahaan (Jaminan Pensiun dari perusahaan)</td>
+                    <td class="amount">Rp {{ number_format($detail->jp_company_income ?? 0, 0, ',', '.') }}</td>
+                </tr>
+                @if (($detail->overtime_total ?? 0) > 0)
+                    <tr class="item">
+                        <td>Lembur / Overtime</td>
+                        <td class="amount">Rp {{ number_format($detail->overtime_total ?? 0, 0, ',', '.') }}</td>
+                    </tr>
+                @endif
                 <tr class="subtotal">
-                    <td>Total Penghasilan Bruto</td>
-                    <td class="amount">Rp {{ number_format($grossSalary, 0, ',', '.') }}</td>
+                    <td>Penghasilan Total</td>
+                    <td class="amount">Rp {{ number_format($detail->total_income ?? 0, 0, ',', '.') }}</td>
                 </tr>
             </table>
         </div>
 
         {{-- ===== DEDUCTIONS ===== --}}
-        <div class="section-header deductions">&#9660; Potongan (Deductions)</div>
+        <div class="section-header deductions">&#9660; Potongan</div>
         <div class="table-wrapper deduct">
             <table class="salary-table">
                 <tr class="item">
-                    <td>BPJS Ketenagakerjaan (2%)</td>
-                    <td class="amount deduct">- Rp {{ number_format($detail->bpjs_tk_deduction ?? 0, 0, ',', '.') }}
-                    </td>
+                    <td>BPJS JHTP (Potongan Jaminan Hari Tua porsi perusahaan)</td>
+                    <td class="amount deduct">- Rp {{ number_format($detail->bpjs_jht_company_deduct ?? $detail->bpjs_jht_company ?? 0, 0, ',', '.') }}</td>
                 </tr>
                 <tr class="item">
-                    <td>BPJS Kesehatan (1%)</td>
-                    <td class="amount deduct">- Rp {{ number_format($detail->bpjs_kes_deduction ?? 0, 0, ',', '.') }}
-                    </td>
+                    <td>BPJS JHTTK (Jaminan Hari Tua Tenaga Kerja - porsi karyawan)</td>
+                    <td class="amount deduct">- Rp {{ number_format($detail->bpjs_jht_employee ?? 0, 0, ',', '.') }}</td>
                 </tr>
                 <tr class="item">
-                    <td>Pajak Penghasilan (PPh 21)</td>
-                    <td class="amount deduct">- Rp {{ number_format($detail->pph21_deduction ?? 0, 0, ',', '.') }}</td>
+                    <td>BPJS JKK (Jaminan Kecelakaan Kerja)</td>
+                    <td class="amount deduct">- Rp {{ number_format($detail->bpjs_jkk_deduct ?? 0, 0, ',', '.') }}</td>
                 </tr>
+                <tr class="item">
+                    <td>BPJS JKM (Jaminan Kematian)</td>
+                    <td class="amount deduct">- Rp {{ number_format($detail->bpjs_jkm_deduct ?? 0, 0, ',', '.') }}</td>
+                </tr>
+                <tr class="item">
+                    <td>BPJS JKN P (Jaminan Kesehatan Nasional)</td>
+                    <td class="amount deduct">- Rp {{ number_format($detail->bpjs_jkn_company_deduct ?? 0, 0, ',', '.') }}</td>
+                </tr>
+                <tr class="item">
+                    <td>JP Perusahaan (Jaminan Pensiun porsi perusahaan)</td>
+                    <td class="amount deduct">- Rp {{ number_format($detail->jp_company_deduct ?? 0, 0, ',', '.') }}</td>
+                </tr>
+                <tr class="item">
+                    <td>JP Tenaga Kerja (Jaminan Pensiun porsi karyawan)</td>
+                    <td class="amount deduct">- Rp {{ number_format($detail->jp_employee ?? 0, 0, ',', '.') }}</td>
+                </tr>
+                @if (($detail->pot_bpjs ?? 0) > 0)
+                    <tr class="item">
+                        <td>Pot. BPJS (Potongan BPJS tambahan)</td>
+                        <td class="amount deduct">- Rp {{ number_format($detail->pot_bpjs, 0, ',', '.') }}</td>
+                    </tr>
+                @endif
+                @if (($detail->pot_pesantren ?? 0) > 0)
+                    <tr class="item">
+                        <td>Pot. Pesantren (Potongan iuran/infak pesantren)</td>
+                        <td class="amount deduct">- Rp {{ number_format($detail->pot_pesantren, 0, ',', '.') }}</td>
+                    </tr>
+                @endif
+                @if (($detail->absent_deduction ?? 0) > 0)
+                    <tr class="item">
+                        <td>Potongan Alpa ({{ $detail->absent_count ?? 0 }} hari)</td>
+                        <td class="amount deduct">- Rp {{ number_format($detail->absent_deduction, 0, ',', '.') }}</td>
+                    </tr>
+                @endif
                 @if (($detail->other_deduction ?? 0) > 0)
                     <tr class="item">
                         <td>Potongan Lainnya</td>
@@ -584,8 +617,8 @@
                     </tr>
                 @endif
                 <tr class="subtotal deduct-total">
-                    <td>Total Potongan</td>
-                    <td class="amount">- Rp {{ number_format($totalDeductions, 0, ',', '.') }}</td>
+                    <td>Jumlah Potongan</td>
+                    <td class="amount">- Rp {{ number_format($detail->total_deduction ?? 0, 0, ',', '.') }}</td>
                 </tr>
             </table>
         </div>

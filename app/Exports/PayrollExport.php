@@ -34,19 +34,31 @@ class PayrollExport implements FromQuery, WithHeadings, WithMapping, WithStyles,
             'Nama Karyawan',
             'Jabatan',
             'Departemen',
+            // Pendapatan
             'Gaji Pokok',
-            'Tunjangan Makan',
+            'BPJS JHTP (Perusahaan)',
+            'BPJS JKK (Perusahaan)',
+            'BPJS JKM (Perusahaan)',
+            'BPJS JKN P (Perusahaan)',
+            'JP Perusahaan',
             'Lembur',
-            'Bonus KPI',
-            'Gross Salary',
-            'PPh 21',
-            'BPJS TK (2%)',
-            'BPJS Kes (1%)',
-            'Potongan Lain',
-            'Total Potongan',
+            'Penghasilan Total',
+            // Potongan
+            'Pot. BPJS JHTP',
+            'Pot. BPJS JHTTK',
+            'Pot. BPJS JKK',
+            'Pot. BPJS JKM',
+            'Pot. BPJS JKN P',
+            'Pot. JP Perusahaan',
+            'Pot. JP Tenaga Kerja',
+            'Pot. BPJS',
+            'Pot. Pesantren',
+            'Pot. Alpa',
+            'Pot. Lain',
+            'Jumlah Potongan',
+            // Net & Hadir
             'Gaji Bersih (Net)',
             'Hari Hadir',
-            'Status',
         ];
     }
 
@@ -60,25 +72,37 @@ class PayrollExport implements FromQuery, WithHeadings, WithMapping, WithStyles,
             $detail->employee->name ?? '-',
             $detail->employee->position ?? '-',
             $detail->employee->department ?? '-',
+            // Pendapatan
             $detail->base_salary,
-            $detail->meal_allowance,
-            $detail->overtime_amount,
-            $detail->kpi_bonus,
-            $detail->gross_salary,
-            $detail->pph21_deduction,
-            $detail->bpjs_tk_deduction,
-            $detail->bpjs_kes_deduction,
+            $detail->bpjs_jht_company,
+            $detail->bpjs_jkk_income,
+            $detail->bpjs_jkm_income,
+            $detail->bpjs_jkn_company,
+            $detail->jp_company_income,
+            $detail->overtime_total,
+            $detail->total_income,
+            // Potongan
+            $detail->bpjs_jht_company_deduct,
+            $detail->bpjs_jht_employee,
+            $detail->bpjs_jkk_deduct,
+            $detail->bpjs_jkm_deduct,
+            $detail->bpjs_jkn_company_deduct,
+            $detail->jp_company_deduct,
+            $detail->jp_employee,
+            $detail->pot_bpjs,
+            $detail->pot_pesantren,
+            $detail->absent_deduction,
             $detail->other_deduction,
             $detail->total_deduction,
+            // Net & Hadir
             $detail->net_salary,
-            $detail->working_days,
-            ucfirst($detail->status ?? 'generated'),
+            $detail->attendance_days,
         ];
     }
 
     public function columnFormats(): array
     {
-        // Kolom F sampai P = angka mata uang IDR
+        // Kolom F sampai Z = angka mata uang IDR
         $rupiahFormat = '#,##0';
         return [
             'F' => $rupiahFormat,
@@ -92,6 +116,16 @@ class PayrollExport implements FromQuery, WithHeadings, WithMapping, WithStyles,
             'N' => $rupiahFormat,
             'O' => $rupiahFormat,
             'P' => $rupiahFormat,
+            'Q' => $rupiahFormat,
+            'R' => $rupiahFormat,
+            'S' => $rupiahFormat,
+            'T' => $rupiahFormat,
+            'U' => $rupiahFormat,
+            'V' => $rupiahFormat,
+            'W' => $rupiahFormat,
+            'X' => $rupiahFormat,
+            'Y' => $rupiahFormat,
+            'Z' => $rupiahFormat,
         ];
     }
 

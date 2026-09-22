@@ -90,10 +90,7 @@
                    class="flex-1 px-4 py-3 text-center text-xs font-bold uppercase tracking-wider whitespace-nowrap {{ request()->routeIs('employee.overtime*') ? 'text-[#7f1d1d] border-b-2 border-red-600' : 'text-gray-400 hover:text-[#7f1d1d]' }} transition">
                     Lembur
                 </a>
-                <a href="{{ route('employee.attendance-revisions.index') }}" 
-                   class="flex-1 px-4 py-3 text-center text-xs font-bold uppercase tracking-wider whitespace-nowrap {{ request()->routeIs('employee.attendance-revisions*') ? 'text-[#7f1d1d] border-b-2 border-red-600' : 'text-gray-400 hover:text-[#7f1d1d]' }} transition">
-                    Revisi
-                </a>
+                {{-- Fitur presensi ulang dinonaktifkan sementara --}}
                 <a href="{{ route('employee.payslip.index') }}" 
                    class="flex-1 px-4 py-3 text-center text-xs font-bold uppercase tracking-wider whitespace-nowrap {{ request()->routeIs('employee.payslip*') ? 'text-[#7f1d1d] border-b-2 border-red-600' : 'text-gray-400 hover:text-[#7f1d1d]' }} transition">
                     Payslip
@@ -176,14 +173,7 @@
                 </svg>
                 <span class="text-[10px] font-bold uppercase tracking-wider block">Lembur</span>
             </a>
-            <!-- Presensi Ulang -->
-            <a href="{{ route('employee.attendance-revisions.index') }}" 
-               class="flex-1 py-3 text-center {{ request()->routeIs('employee.attendance-revisions*') ? 'text-[#7f1d1d] border-t-2 border-red-600' : 'text-gray-400' }} transition">
-                <svg class="w-5 h-5 mx-auto mb-1 {{ request()->routeIs('employee.attendance-revisions*') ? 'text-red-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.657 48.657 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3"/>
-                </svg>
-                <span class="text-[10px] font-bold uppercase tracking-wider block">Revisi</span>
-            </a>
+            {{-- Fitur presensi ulang dinonaktifkan sementara --}}
             <!-- Payslip -->
             <a href="{{ route('employee.payslip.index') }}" 
                class="flex-1 py-3 text-center {{ request()->routeIs('employee.payslip*') ? 'text-[#7f1d1d] border-t-2 border-red-600' : 'text-gray-400' }} transition">

@@ -83,7 +83,7 @@
                 <form method="POST" action="{{ route('admin.payrolls.generate', $payroll) }}" class="inline-block">
                     @csrf
                     <button type="submit" class="inline-flex items-center justify-center bg-[#0a2219] hover:bg-[#123b2c] text-white px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition duration-150 border border-transparent shadow-sm"
-                            onclick="confirmAction(event, 'Generate payroll untuk semua karyawan? Ini akan menghitung: Gaji pokok, Tunjangan makan, Lembur, Potongan BPJS & PPh21', this);">
+                            onclick="confirmAction(event, 'Generate payroll untuk semua karyawan? Ini akan menghitung komponen Pendapatan (Gaji Pokok, BPJS Perusahaan, Lembur) dan Potongan (BPJS, JP, Pesantren, Alpa).', this);">
                         <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -117,7 +117,7 @@
                     <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    Edit Bonus/Potongan
+                    Edit Potongan Lain
                 </a>
             @endif
         </div>
@@ -126,28 +126,23 @@
     <!-- Payroll Details Table -->
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[1000px] border-collapse">
+            <table class="w-full min-w-[1050px] border-collapse">
                 <thead>
                     <tr class="bg-[#f0f4f2] border-b border-gray-100">
-                        <th class="px-6 py-4.5 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Karyawan</th>
-                        <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Gaji Pokok</th>
-                        <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Tunj. Makan</th>
-                        <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Lembur</th>
-                        <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Gaji Gross</th>
-                        <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Potongan</th>
-                        <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Net Salary</th>
-                        <th class="px-6 py-4.5 text-center text-xs font-bold text-[#0a2219] uppercase tracking-wider">Aksi</th>
+                        <th class="px-5 py-4 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Karyawan</th>
+                        <th class="px-5 py-4 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Gaji Pokok</th>
+                        <th class="px-5 py-4 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Lembur</th>
+                        <th class="px-5 py-4 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Penghasilan Total</th>
+                        <th class="px-5 py-4 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Jumlah Potongan</th>
+                        <th class="px-5 py-4 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Gaji Bersih</th>
+                        <th class="px-5 py-4 text-center text-xs font-bold text-[#0a2219] uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-50">
                     @forelse ($payroll->details as $detail)
-                        @php
-                            $gross = $detail->base_salary + $detail->meal_allowance + $detail->overtime_total;
-                            $deduction = $detail->pph21_deduction + $detail->bpjs_tk_deduction + $detail->bpjs_kes_deduction;
-                        @endphp
                         <tr class="hover:bg-[#fcfdfc] transition duration-150">
                             <!-- Employee Name -->
-                            <td class="px-6 py-4">
+                            <td class="px-5 py-4">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-9 h-9 bg-[#e7f0ec] text-[#0a2219] rounded-xl flex items-center justify-center font-bold text-sm border border-[#d2dfd8]">
                                         {{ substr($detail->employee->name, 0, 1) }}
@@ -160,39 +155,34 @@
                             </td>
                             
                             <!-- Base Salary -->
-                            <td class="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                            <td class="px-5 py-4 text-right text-sm font-semibold text-gray-700">
                                 Rp {{ number_format($detail->base_salary, 0, ',', '.') }}
                             </td>
                             
-                            <!-- Meal Allowance -->
-                            <td class="px-6 py-4 text-right text-sm font-semibold text-gray-700">
-                                Rp {{ number_format($detail->meal_allowance, 0, ',', '.') }}
-                            </td>
-                            
                             <!-- Overtime Total -->
-                            <td class="px-6 py-4 text-right text-sm font-semibold text-gray-700">
+                            <td class="px-5 py-4 text-right text-sm font-semibold text-gray-700">
                                 Rp {{ number_format($detail->overtime_total, 0, ',', '.') }}
                             </td>
                             
-                            <!-- Gross Salary -->
-                            <td class="px-6 py-4 text-right text-sm font-bold text-[#0a2219]">
-                                Rp {{ number_format($gross, 0, ',', '.') }}
+                            <!-- Gross / Total Income -->
+                            <td class="px-5 py-4 text-right text-sm font-bold text-[#0a2219]">
+                                Rp {{ number_format($detail->total_income, 0, ',', '.') }}
                             </td>
                             
                             <!-- Deductions -->
-                            <td class="px-6 py-4 text-right text-sm font-semibold text-red-500">
-                                - Rp {{ number_format($deduction, 0, ',', '.') }}
+                            <td class="px-5 py-4 text-right text-sm font-semibold text-red-500">
+                                - Rp {{ number_format($detail->total_deduction, 0, ',', '.') }}
                             </td>
                             
                             <!-- Net Salary -->
-                            <td class="px-6 py-4 text-right text-sm font-bold text-emerald-600">
+                            <td class="px-5 py-4 text-right text-sm font-extrabold text-emerald-600">
                                 Rp {{ number_format($detail->net_salary, 0, ',', '.') }}
                             </td>
                             
                             <!-- Modal Button -->
-                            <td class="px-6 py-4 text-center">
-                                <button type="button" onclick="showDetail({{ $detail->id }})" class="inline-flex items-center text-xs font-bold text-[#0a2219] hover:text-[#d4af37] transition duration-150">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <td class="px-5 py-4 text-center">
+                                <button type="button" onclick="showDetail({{ $detail->id }})" class="inline-flex items-center px-3 py-1.5 rounded-lg bg-[#e7f0ec] text-[#0a2219] hover:bg-[#0a2219] hover:text-white text-xs font-bold transition duration-150">
+                                    <svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                     </svg>
@@ -202,7 +192,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="px-6 py-12 text-center text-gray-500 font-medium">
+                            <td colspan="7" class="px-6 py-12 text-center text-gray-500 font-medium">
                                 <div class="flex flex-col items-center">
                                     <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -222,7 +212,7 @@
 
     <!-- Detail Modal (With Glassmorphic Overlay) -->
     <div id="detailModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm items-center justify-center p-4 z-50 transition duration-300">
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-2xl p-8 max-w-md w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-all duration-300" id="detailContent">
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-2xl p-6 sm:p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto transform scale-95 transition-all duration-300" id="detailContent">
             <!-- Loaded dynamically via JS -->
         </div>
     </div>
@@ -232,11 +222,31 @@
             const detail = @json($payroll->details).find(d => d.id === detailId);
             if (!detail) return;
 
-            const gross = detail.base_salary + detail.meal_allowance + detail.overtime_total;
-            const deduction = detail.pph21_deduction + detail.bpjs_tk_deduction + detail.bpjs_kes_deduction;
+            const nf = new Intl.NumberFormat('id-ID');
+            const bpjsJhtpDeduct = detail.bpjs_jht_company_deduct ? Number(detail.bpjs_jht_company_deduct) : Number(detail.bpjs_jht_company);
+
+            const totalIncome = Number(detail.base_salary || 0)
+                + Number(detail.bpjs_jht_company || 0)
+                + Number(detail.bpjs_jkk_income || 0)
+                + Number(detail.bpjs_jkm_income || 0)
+                + Number(detail.bpjs_jkn_company || 0)
+                + Number(detail.jp_company_income || 0)
+                + Number(detail.overtime_total || 0);
+
+            const totalDeduct = bpjsJhtpDeduct
+                + Number(detail.bpjs_jht_employee || 0)
+                + Number(detail.bpjs_jkk_deduct || 0)
+                + Number(detail.bpjs_jkm_deduct || 0)
+                + Number(detail.bpjs_jkn_company_deduct || 0)
+                + Number(detail.jp_company_deduct || 0)
+                + Number(detail.jp_employee || 0)
+                + Number(detail.pot_bpjs || 0)
+                + Number(detail.pot_pesantren || 0)
+                + Number(detail.absent_deduction || 0)
+                + Number(detail.other_deduction || 0);
 
             const html = `
-                <div class="flex items-center space-x-3 mb-6 border-b border-gray-100 pb-4">
+                <div class="flex items-center space-x-3 mb-5 border-b border-gray-100 pb-4">
                     <div class="w-10 h-10 bg-[#e7f0ec] text-[#0a2219] rounded-xl flex items-center justify-center font-bold text-sm border border-[#d2dfd8]">
                         ${detail.employee.name.charAt(0)}
                     </div>
@@ -246,52 +256,118 @@
                     </div>
                 </div>
 
-                <div class="space-y-3.5 text-xs font-semibold">
-                    <div class="border-b border-gray-50 pb-2">
-                        <span class="text-[9px] text-[#0a2219] font-bold uppercase tracking-widest block mb-2">Penghasilan (Gross)</span>
-                        <div class="flex justify-between py-1 text-gray-600">
-                            <span>Gaji Pokok</span>
-                            <span class="text-gray-800 font-bold">Rp ${new Intl.NumberFormat('id-ID').format(detail.base_salary)}</span>
+                <div class="space-y-4 text-xs font-semibold">
+                    <!-- PENDAPATAN -->
+                    <div class="border-b border-gray-100 pb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] text-[#0a2219] font-extrabold uppercase tracking-wider">Pendapatan (Penghasilan)</span>
+                            <span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded">Bruto</span>
                         </div>
-                        <div class="flex justify-between py-1 text-gray-600">
-                            <span>Tunjangan Makan</span>
-                            <span class="text-gray-800 font-bold">Rp ${new Intl.NumberFormat('id-ID').format(detail.meal_allowance)}</span>
+                        <div class="space-y-1.5 text-gray-600">
+                            <div class="flex justify-between py-0.5">
+                                <span>Gaji Pokok</span>
+                                <span class="text-gray-800 font-bold">Rp ${nf.format(detail.base_salary)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>BPJS JHTP (Perusahaan)</span>
+                                <span class="text-gray-800">Rp ${nf.format(detail.bpjs_jht_company)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>BPJS JKK (Perusahaan)</span>
+                                <span class="text-gray-800">Rp ${nf.format(detail.bpjs_jkk_income)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>BPJS JKM (Perusahaan)</span>
+                                <span class="text-gray-800">Rp ${nf.format(detail.bpjs_jkm_income)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>BPJS JKN P (Perusahaan)</span>
+                                <span class="text-gray-800">Rp ${nf.format(detail.bpjs_jkn_company)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>JP Perusahaan</span>
+                                <span class="text-gray-800">Rp ${nf.format(detail.jp_company_income)}</span>
+                            </div>
+                            ${Number(detail.overtime_total) > 0 ? `
+                            <div class="flex justify-between py-0.5">
+                                <span>Lembur / Overtime</span>
+                                <span class="text-gray-800 font-bold">Rp ${nf.format(detail.overtime_total)}</span>
+                            </div>` : ''}
                         </div>
-                        <div class="flex justify-between py-1 text-gray-600">
-                            <span>Nominal Lembur</span>
-                            <span class="text-gray-800 font-bold">Rp ${new Intl.NumberFormat('id-ID').format(detail.overtime_total)}</span>
-                        </div>
-                        <div class="flex justify-between pt-2 border-t border-dashed border-gray-200 font-extrabold text-gray-800">
-                            <span>Total Gross</span>
-                            <span class="text-[#0a2219]">Rp ${new Intl.NumberFormat('id-ID').format(gross)}</span>
+                        <div class="flex justify-between pt-2 mt-2 border-t border-dashed border-gray-200 font-extrabold text-gray-800">
+                            <span>Penghasilan Total</span>
+                            <span class="text-[#0a2219]">Rp ${nf.format(totalIncome)}</span>
                         </div>
                     </div>
 
-                    <div class="border-b border-gray-50 pb-2 pt-1">
-                        <span class="text-[9px] text-red-600 font-bold uppercase tracking-widest block mb-2">Potongan (Deductions)</span>
-                        <div class="flex justify-between py-1 text-gray-500">
-                            <span>PPh Pasal 21 (Pajak)</span>
-                            <span class="text-red-500">Rp ${new Intl.NumberFormat('id-ID').format(detail.pph21_deduction)}</span>
+                    <!-- POTONGAN -->
+                    <div class="border-b border-gray-100 pb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-[10px] text-red-600 font-extrabold uppercase tracking-wider">Potongan</span>
+                            <span class="text-[9px] bg-red-50 text-red-700 font-bold px-2 py-0.5 rounded">Deductions</span>
                         </div>
-                        <div class="flex justify-between py-1 text-gray-500">
-                            <span>BPJS Ketenagakerjaan</span>
-                            <span class="text-red-500">Rp ${new Intl.NumberFormat('id-ID').format(detail.bpjs_tk_deduction)}</span>
+                        <div class="space-y-1.5 text-gray-500">
+                            <div class="flex justify-between py-0.5">
+                                <span>BPJS JHTP (Balik)</span>
+                                <span class="text-red-500">- Rp ${nf.format(bpjsJhtpDeduct)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>BPJS JHTTK (Tenaga Kerja)</span>
+                                <span class="text-red-500">- Rp ${nf.format(detail.bpjs_jht_employee)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>BPJS JKK</span>
+                                <span class="text-red-500">- Rp ${nf.format(detail.bpjs_jkk_deduct)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>BPJS JKM</span>
+                                <span class="text-red-500">- Rp ${nf.format(detail.bpjs_jkm_deduct)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>BPJS JKN P</span>
+                                <span class="text-red-500">- Rp ${nf.format(detail.bpjs_jkn_company_deduct)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>JP Perusahaan</span>
+                                <span class="text-red-500">- Rp ${nf.format(detail.jp_company_deduct)}</span>
+                            </div>
+                            <div class="flex justify-between py-0.5">
+                                <span>JP Tenaga Kerja</span>
+                                <span class="text-red-500">- Rp ${nf.format(detail.jp_employee)}</span>
+                            </div>
+                            ${Number(detail.pot_bpjs) > 0 ? `
+                            <div class="flex justify-between py-0.5">
+                                <span>Pot. BPJS</span>
+                                <span class="text-red-500">- Rp ${nf.format(detail.pot_bpjs)}</span>
+                            </div>` : ''}
+                            ${Number(detail.pot_pesantren) > 0 ? `
+                            <div class="flex justify-between py-0.5">
+                                <span>Pot. Pesantren</span>
+                                <span class="text-red-500">- Rp ${nf.format(detail.pot_pesantren)}</span>
+                            </div>` : ''}
+                            ${Number(detail.absent_deduction) > 0 ? `
+                            <div class="flex justify-between py-0.5">
+                                <span>Potongan Alpa (${detail.absent_count} hari)</span>
+                                <span class="text-red-500">- Rp ${nf.format(detail.absent_deduction)}</span>
+                            </div>` : ''}
+                            ${Number(detail.other_deduction) > 0 ? `
+                            <div class="flex justify-between py-0.5">
+                                <span>Potongan Lainnya</span>
+                                <span class="text-red-500">- Rp ${nf.format(detail.other_deduction)}</span>
+                            </div>` : ''}
                         </div>
-                        <div class="flex justify-between py-1 text-gray-500">
-                            <span>BPJS Kesehatan</span>
-                            <span class="text-red-500">Rp ${new Intl.NumberFormat('id-ID').format(detail.bpjs_kes_deduction)}</span>
-                        </div>
-                        <div class="flex justify-between pt-2 border-t border-dashed border-gray-200 font-extrabold text-red-600">
-                            <span>Total Potongan</span>
-                            <span>Rp ${new Intl.NumberFormat('id-ID').format(deduction)}</span>
+                        <div class="flex justify-between pt-2 mt-2 border-t border-dashed border-gray-200 font-extrabold text-red-600">
+                            <span>Jumlah Potongan</span>
+                            <span>- Rp ${nf.format(totalDeduct)}</span>
                         </div>
                     </div>
 
-                    <div class="bg-[#faf3e0] p-4 rounded-xl border border-[#f3e7c4] mt-4">
+                    <!-- THP -->
+                    <div class="bg-[#faf3e0] p-4 rounded-xl border border-[#f3e7c4]">
                         <span class="text-[9px] text-[#8a6d1c] font-bold uppercase tracking-widest block">Gaji Bersih (Take Home Pay)</span>
                         <div class="flex justify-between items-center mt-1">
-                            <span class="text-xs text-gray-600 font-bold">NET SALARY</span>
-                            <span class="text-base font-extrabold text-emerald-700">Rp ${new Intl.NumberFormat('id-ID').format(detail.net_salary)}</span>
+                            <span class="text-xs text-gray-700 font-bold">NET SALARY</span>
+                            <span class="text-base font-extrabold text-emerald-700">Rp ${nf.format(detail.net_salary)}</span>
                         </div>
                     </div>
                 </div>
@@ -301,14 +377,16 @@
                 </button>
             `;
 
+            const modal = document.getElementById('detailModal');
             document.getElementById('detailContent').innerHTML = html;
-            document.getElementById('detailModal').classList.remove('hidden');
-            document.getElementById('detailModal').classList.add('flex');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
         }
 
         function closeModal() {
-            document.getElementById('detailModal').classList.remove('flex');
-            document.getElementById('detailModal').classList.add('hidden');
+            const modal = document.getElementById('detailModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
         }
 
         // Close on clicking backdrop

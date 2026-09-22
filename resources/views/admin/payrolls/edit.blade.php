@@ -29,18 +29,13 @@
                         <tr class="bg-[#f0f4f2] border-b border-gray-100">
                             <th class="px-6 py-4.5 text-left text-xs font-bold text-[#0a2219] uppercase tracking-wider">Karyawan</th>
                             <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Gaji Pokok</th>
-                            <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Bonus KPI (Rp)</th>
+                            <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Penghasilan Total</th>
                             <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Potongan Lain (Rp)</th>
                             <th class="px-6 py-4.5 text-right text-xs font-bold text-[#0a2219] uppercase tracking-wider">Net Salary</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-50">
                         @forelse ($payroll->details as $detail)
-                            @php
-                                $gross = $detail->base_salary + $detail->meal_allowance + $detail->overtime_total + $detail->kpi_bonus;
-                                $deduction = $detail->pph21_deduction + $detail->bpjs_tk_deduction + $detail->bpjs_kes_deduction + $detail->other_deduction;
-                                $net = $gross - $deduction;
-                            @endphp
                             <tr class="hover:bg-[#fcfdfc] transition duration-150">
                                 <!-- Employee Name -->
                                 <td class="px-6 py-4">
@@ -59,23 +54,22 @@
                                 <td class="px-6 py-4 text-right text-sm font-semibold text-gray-700">
                                     Rp {{ number_format($detail->base_salary, 0, ',', '.') }}
                                 </td>
-                                
-                                <!-- KPI Bonus Input -->
-                                <td class="px-6 py-4 text-right">
-                                    <input type="hidden" name="details[{{ $detail->id }}][id]" value="{{ $detail->id }}">
-                                    <input type="number" name="details[{{ $detail->id }}][kpi_bonus]" value="{{ $detail->kpi_bonus }}" 
-                                           class="w-36 px-3 py-2 border border-gray-300 rounded-xl text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] transition duration-200" min="0" step="1000">
+
+                                <!-- Total Income -->
+                                <td class="px-6 py-4 text-right text-sm font-bold text-[#0a2219]">
+                                    Rp {{ number_format($detail->total_income, 0, ',', '.') }}
                                 </td>
                                 
                                 <!-- Other Deduction Input -->
                                 <td class="px-6 py-4 text-right">
+                                    <input type="hidden" name="details[{{ $detail->id }}][id]" value="{{ $detail->id }}">
                                     <input type="number" name="details[{{ $detail->id }}][other_deduction]" value="{{ $detail->other_deduction }}" 
                                            class="w-36 px-3 py-2 border border-gray-300 rounded-xl text-sm text-right focus:outline-none focus:ring-2 focus:ring-[#d4af37] focus:border-[#d4af37] transition duration-200" min="0" step="1000">
                                 </td>
                                 
                                 <!-- Net Salary Preview -->
                                 <td class="px-6 py-4 text-right text-sm font-bold text-emerald-600">
-                                    Rp {{ number_format($net, 0, ',', '.') }}
+                                    Rp {{ number_format($detail->net_salary, 0, ',', '.') }}
                                 </td>
                             </tr>
                         @empty

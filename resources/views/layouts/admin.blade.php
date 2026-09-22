@@ -148,16 +148,7 @@
                         Cuti & Izin
                     </a>
 
-                    <!-- Presensi Ulang -->
-                    <a href="{{ route('admin.attendance-revisions.index') }}"
-                        class="flex items-center px-4 py-2.5 rounded-xl transition duration-150 text-sm font-semibold {{ request()->routeIs('admin.attendance-revisions*') ? 'sidebar-active' : 'text-gray-300 hover:bg-[#991b1b] hover:text-white' }}">
-                        <svg class="w-5 h-5 mr-3 {{ request()->routeIs('admin.attendance-revisions*') ? 'text-white' : 'text-red-200/70' }}"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.678 48.678 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7c-.017.22-.032.441-.046.662M19.5 12l3-3m-3 3l-3-3m-12 3c0 1.232.046 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.657 48.657 0 007.324 0 4.006 4.006 0 003.7-3.7c.017-.22.032-.441.046-.662M4.5 12l3 3m-3-3l-3 3" />
-                        </svg>
-                        Presensi Ulang
-                    </a>
+                    {{-- Fitur presensi ulang dinonaktifkan sementara --}}
 
                     <!-- Penggajian -->
                     <a href="{{ route('admin.payrolls.index') }}"

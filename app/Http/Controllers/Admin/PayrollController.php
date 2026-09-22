@@ -82,11 +82,14 @@ class PayrollController extends Controller
         $payroll = Payroll::with('details.employee', 'createdBy')->findOrFail($id);
 
         $totalGross = $payroll->details->sum(function ($detail) {
-            return $detail->base_salary + $detail->meal_allowance + $detail->overtime_total;
+            return $detail->total_income;
+        });
+
+        $totalDeduction = $payroll->details->sum(function ($detail) {
+            return $detail->total_deduction;
         });
 
         $totalNet = $payroll->details->sum('net_salary');
-        $totalDeduction = $totalGross - $totalNet;
 
         return view('admin.payrolls.show', [
             'payroll' => $payroll,
@@ -155,7 +158,6 @@ class PayrollController extends Controller
         $payroll = Payroll::findOrFail($id);
 
         $request->validate([
-            'details.*.kpi_bonus'       => 'nullable|numeric|min:0',
             'details.*.other_deduction' => 'nullable|numeric|min:0',
         ]);
 
@@ -163,28 +165,21 @@ class PayrollController extends Controller
             foreach ($request->input('details', []) as $detailId => $data) {
                 $detail = PayrollDetail::findOrFail($detailId);
 
-                $kpiBonus      = (float) ($data['kpi_bonus'] ?? $detail->kpi_bonus ?? 0);
-                $otherDeduct   = (float) ($data['other_deduction'] ?? $detail->other_deduction ?? 0);
+                $otherDeduct = (float) ($data['other_deduction'] ?? 0);
 
-                // Hitung ulang net salary
-                $gross  = (float) $detail->base_salary
-                        + (float) $detail->meal_allowance
-                        + (float) $detail->overtime_total
-                        + $kpiBonus;
-
-                $deduct = (float) $detail->pph21_deduction
-                        + (float) $detail->bpjs_tk_deduction
-                        + (float) $detail->bpjs_kes_deduction
-                        + $otherDeduct;
+                // Hitung ulang total potongan dengan other_deduction yang baru
+                $detail->other_deduction = $otherDeduct;
+                $gross  = $detail->total_income;
+                $deduct = $detail->total_deduction;
+                $net    = max(0, $gross - $deduct);
 
                 $detail->update([
-                    'kpi_bonus'       => $kpiBonus,
                     'other_deduction' => $otherDeduct,
-                    'net_salary'      => $gross - $deduct,
+                    'net_salary'      => $net,
                 ]);
             }
 
-            return back()->with('success', 'Bonus & potongan berhasil diperbarui. Net salary telah dihitung ulang.');
+            return back()->with('success', 'Potongan lainnya berhasil diperbarui. Net salary telah dihitung ulang.');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

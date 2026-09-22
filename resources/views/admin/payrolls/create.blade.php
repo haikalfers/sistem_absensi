@@ -65,8 +65,8 @@
                     </h4>
                     <ul class="text-xs space-y-1 leading-relaxed font-semibold">
                         <li>✓ Periode baru akan dibuat dalam status <strong class="text-[#0a2219]">Draft</strong>.</li>
-                        <li>✓ Anda dapat menyesuaikan nominal bonus KPI dan potongan lainnya secara individual sebelum divalidasi.</li>
-                        <li>✓ Gunakan tombol "Generate" untuk memicu perhitungan otomatis (Gaji pokok, tunjangan, lembur, pajak PPh21, BPJS).</li>
+                        <li>✓ Gunakan tombol "Generate" untuk memicu perhitungan otomatis (Gaji pokok, BPJS Perusahaan, lembur, dan potongan).</li>
+                        <li>✓ Anda dapat menyesuaikan nominal potongan lainnya secara individual sebelum difinalisasi.</li>
                     </ul>
                 </div>
 

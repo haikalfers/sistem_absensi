@@ -133,9 +133,9 @@
                     <span class="text-gray-800 font-bold">Rp {{ number_format($latestPayslip->base_salary, 0, ',', '.') }}</span>
                 </div>
                 <div class="flex justify-between">
-                    <span>Potongan Pajak & BPJS</span>
-                    <span class="text-red-500">
-                        - Rp {{ number_format($latestPayslip->base_salary + $latestPayslip->meal_allowance + $latestPayslip->overtime_total - $latestPayslip->net_salary, 0, ',', '.') }}
+                    <span>Jumlah Potongan</span>
+                    <span class="text-red-500 font-bold">
+                        - Rp {{ number_format($latestPayslip->total_deduction, 0, ',', '.') }}
                     </span>
                 </div>
                 <div class="border-t border-gray-200 pt-2.5 flex justify-between items-center text-sm">

@@ -108,23 +108,48 @@ class PayrollService
             ->sum('overtime_amount');
 
         // ===== KOMPONEN BPJS PENDAPATAN (Porsi Perusahaan) =====
+        // Ambil rate dari settings (disimpan dalam persen, misal 3.27 untuk 3.27%)
+        $jhtCompanyRate  = (float) ($settings['bpjs_jht_company_rate'] ?? 3.27);
+        $jkkRate         = (float) ($settings['bpjs_jkk_rate'] ?? 0.89);
+        $jkmRate         = (float) ($settings['bpjs_jkm_rate'] ?? 0.30);
+        $jknCompanyRate  = (float) ($settings['bpjs_jkn_company_rate'] ?? 4.00);
+        $jpCompanyRate   = (float) ($settings['jp_company_rate'] ?? 2.00);
+        $jhtEmployeeRate = (float) ($settings['bpjs_jht_employee_rate'] ?? 2.00);
+        $jpEmployeeRate  = (float) ($settings['jp_employee_rate'] ?? 1.00);
+
+        // Pastikan nilai adalah faktor desimal (jika di DB bernilai misal 3.27, dibagi 100 menjadi 0.0327)
+        $jhtCompanyRate  = $jhtCompanyRate > 0.5 ? $jhtCompanyRate / 100 : $jhtCompanyRate;
+        $jkkRate         = $jkkRate > 0.5 ? $jkkRate / 100 : $jkkRate;
+        $jkmRate         = $jkmRate > 0.05 ? $jkmRate / 100 : $jkmRate;
+        $jknCompanyRate  = $jknCompanyRate > 0.5 ? $jknCompanyRate / 100 : $jknCompanyRate;
+        $jpCompanyRate   = $jpCompanyRate > 0.5 ? $jpCompanyRate / 100 : $jpCompanyRate;
+        $jhtEmployeeRate = $jhtEmployeeRate > 0.5 ? $jhtEmployeeRate / 100 : $jhtEmployeeRate;
+        $jpEmployeeRate  = $jpEmployeeRate > 0.5 ? $jpEmployeeRate / 100 : $jpEmployeeRate;
+
         // Muncul di kolom pendapatan untuk transparansi, langsung dipotongan balik
-        $bpjsJhtCompany  = $baseSalary * ($settings['bpjs_jht_company_rate'] ?? 0.0327);
-        $bpjsJkkIncome   = $baseSalary * ($settings['bpjs_jkk_rate'] ?? 0.0089);
-        $bpjsJkmIncome   = $baseSalary * ($settings['bpjs_jkm_rate'] ?? 0.003);
-        $bpjsJknCompany  = $baseSalary * ($settings['bpjs_jkn_company_rate'] ?? 0.04);
-        $jpCompanyIncome = $baseSalary * ($settings['jp_company_rate'] ?? 0.02);
+        $bpjsJhtCompany  = $baseSalary * $jhtCompanyRate;
+        $bpjsJkkIncome   = $baseSalary * $jkkRate;
+        $bpjsJkmIncome   = $baseSalary * $jkmRate;
+        $bpjsJknCompany  = $baseSalary * $jknCompanyRate;
+        $jpCompanyIncome = $baseSalary * $jpCompanyRate;
 
         // ===== KOMPONEN POTONGAN =====
         // Potongan Balik (nilai sama dengan pendapatan porsi perusahaan)
-        $bpjsJhtEmployee      = $baseSalary * ($settings['bpjs_jht_employee_rate'] ?? 0.02);
-        $bpjsJkkDeduct        = $bpjsJkkIncome;    // Balik penuh
-        $bpjsJkmDeduct        = $bpjsJkmIncome;    // Balik penuh
-        $bpjsJknCompanyDeduct = $bpjsJknCompany;   // Balik penuh
-        $jpCompanyDeduct      = $jpCompanyIncome;  // Balik penuh
-        $jpEmployee           = $baseSalary * ($settings['jp_employee_rate'] ?? 0.01);
+        $bpjsJhtCompanyDeduct = $bpjsJhtCompany;   // Balik penuh BPJS JHTP
+        $bpjsJhtEmployee      = $baseSalary * $jhtEmployeeRate; // BPJS JHTTK
+        $bpjsJkkDeduct        = $bpjsJkkIncome;    // Balik penuh BPJS JKK
+        $bpjsJkmDeduct        = $bpjsJkmIncome;    // Balik penuh BPJS JKM
+        $bpjsJknCompanyDeduct = $bpjsJknCompany;   // Balik penuh BPJS JKN P
+        $jpCompanyDeduct      = $jpCompanyIncome;  // Balik penuh JP Perusahaan
+        $jpEmployee           = $baseSalary * $jpEmployeeRate; // JP Tenaga Kerja
         $potBpjs              = (float) ($settings['pot_bpjs_nominal'] ?? 0);
         $potPesantren         = (float) ($settings['pot_pesantren_nominal'] ?? 0);
+
+        // Ambil existing other_deduction jika sebelumnya sudah di-input oleh Admin
+        $existingDetail = PayrollDetail::where('payroll_id', $payroll->id)
+            ->where('employee_id', $employee->id)
+            ->first();
+        $otherDeduction = $existingDetail ? (float) $existingDetail->other_deduction : 0;
 
         // Potongan Alpa: Gaji Pokok ÷ Hari Kerja × Jumlah Hari Alpa
         $absentDeduction = $workingDays > 0
@@ -140,7 +165,8 @@ class PayrollService
             + $jpCompanyIncome
             + $overtimeTotal;
 
-        $totalDeduction = $bpjsJhtEmployee
+        $totalDeduction = $bpjsJhtCompanyDeduct
+            + $bpjsJhtEmployee
             + $bpjsJkkDeduct
             + $bpjsJkmDeduct
             + $bpjsJknCompanyDeduct
@@ -148,7 +174,8 @@ class PayrollService
             + $jpEmployee
             + $potBpjs
             + $potPesantren
-            + $absentDeduction;
+            + $absentDeduction
+            + $otherDeduction;
 
         $netSalary = max(0, $totalIncome - $totalDeduction);
 
@@ -166,6 +193,7 @@ class PayrollService
                 'bpjs_jkn_company'        => round($bpjsJknCompany, 2),
                 'jp_company_income'       => round($jpCompanyIncome, 2),
                 // Potongan
+                'bpjs_jht_company_deduct' => round($bpjsJhtCompanyDeduct, 2),
                 'bpjs_jht_employee'       => round($bpjsJhtEmployee, 2),
                 'bpjs_jkk_deduct'         => round($bpjsJkkDeduct, 2),
                 'bpjs_jkm_deduct'         => round($bpjsJkmDeduct, 2),
@@ -175,7 +203,7 @@ class PayrollService
                 'pot_bpjs'                => round($potBpjs, 2),
                 'pot_pesantren'           => round($potPesantren, 2),
                 'absent_deduction'        => round($absentDeduction, 2),
-                'other_deduction'         => 0,
+                'other_deduction'         => round($otherDeduction, 2),
                 // Summary
                 'overtime_total'          => round($overtimeTotal, 2),
                 'net_salary'              => round($netSalary, 2),

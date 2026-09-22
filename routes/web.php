@@ -79,13 +79,15 @@ Route::middleware('auth')->group(function () {
             Route::put('/{id}/reject', [Admin\LeaveRequestController::class, 'reject'])->name('reject');
         });
 
-        // Pengajuan Presensi Ulang
+        // Pengajuan Presensi Ulang (Dinonaktifkan sementara)
+        /*
         Route::prefix('attendance-revisions')->name('attendance-revisions.')->group(function () {
             Route::get('/', [Admin\AttendanceRevisionController::class, 'index'])->name('index');
             Route::get('/{id}', [Admin\AttendanceRevisionController::class, 'show'])->name('show');
             Route::put('/{id}/approve', [Admin\AttendanceRevisionController::class, 'approve'])->name('approve');
             Route::put('/{id}/reject', [Admin\AttendanceRevisionController::class, 'reject'])->name('reject');
         });
+        */
 
         // Penggajian
         Route::prefix('payrolls')->name('payrolls.')->group(function () {
@@ -151,13 +153,15 @@ Route::middleware('auth')->group(function () {
             Route::delete('/{id}', [Employee\LeaveRequestController::class, 'destroy'])->name('destroy');
         });
 
-        // Pengajuan Presensi Ulang
+        // Pengajuan Presensi Ulang (Dinonaktifkan sementara)
+        /*
         Route::prefix('attendance-revisions')->name('attendance-revisions.')->group(function () {
             Route::get('/', [Employee\AttendanceRevisionController::class, 'index'])->name('index');
             Route::get('/create', [Employee\AttendanceRevisionController::class, 'create'])->name('create');
             Route::post('/', [Employee\AttendanceRevisionController::class, 'store'])->name('store');
             Route::delete('/{id}', [Employee\AttendanceRevisionController::class, 'destroy'])->name('destroy');
         });
+        */
 
         // Pengajuan Lembur Mandiri
         Route::prefix('overtime')->name('overtime.')->group(function () {

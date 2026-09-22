@@ -443,23 +443,8 @@
             <tbody>
                 @forelse($payroll->details as $i => $detail)
                 @php
-                    $gross  = ($detail->base_salary ?? 0)
-                            + ($detail->bpjs_jht_company ?? 0)
-                            + ($detail->bpjs_jkk_income ?? 0)
-                            + ($detail->bpjs_jkm_income ?? 0)
-                            + ($detail->bpjs_jkn_company ?? 0)
-                            + ($detail->jp_company_income ?? 0)
-                            + ($detail->overtime_total ?? 0);
-                    $deduct = ($detail->bpjs_jht_employee ?? 0)
-                            + ($detail->bpjs_jkk_deduct ?? 0)
-                            + ($detail->bpjs_jkm_deduct ?? 0)
-                            + ($detail->bpjs_jkn_company_deduct ?? 0)
-                            + ($detail->jp_company_deduct ?? 0)
-                            + ($detail->jp_employee ?? 0)
-                            + ($detail->pot_bpjs ?? 0)
-                            + ($detail->pot_pesantren ?? 0)
-                            + ($detail->absent_deduction ?? 0)
-                            + ($detail->other_deduction ?? 0);
+                    $gross  = $detail->total_income;
+                    $deduct = $detail->total_deduction;
                     $bpjsPerusahaan = ($detail->bpjs_jht_company ?? 0)
                                     + ($detail->bpjs_jkk_income ?? 0)
                                     + ($detail->bpjs_jkm_income ?? 0)

@@ -46,8 +46,8 @@
                     <th class="px-6 py-3 font-semibold text-gray-700">Karyawan</th>
                     <th class="px-6 py-3 font-semibold text-gray-700 text-right">Gaji Pokok</th>
                     <th class="px-6 py-3 font-semibold text-gray-700 text-right">Lembur</th>
-                    <th class="px-6 py-3 font-semibold text-gray-700 text-right">Tunjangan</th>
-                    <th class="px-6 py-3 font-semibold text-gray-700 text-right">Potongan (PPh/BPJS)</th>
+                    <th class="px-6 py-3 font-semibold text-gray-700 text-right">Penghasilan Total</th>
+                    <th class="px-6 py-3 font-semibold text-gray-700 text-right">Jumlah Potongan</th>
                     <th class="px-6 py-3 font-semibold text-gray-700 text-right">Gaji Bersih</th>
                 </tr>
             </thead>
@@ -58,8 +58,8 @@
                         <td class="px-6 py-3 font-medium text-gray-800">{{ $detail->employee->name }}</td>
                         <td class="px-6 py-3 text-gray-700 text-right">Rp {{ number_format($detail->base_salary, 0, ',', '.') }}</td>
                         <td class="px-6 py-3 text-gray-700 text-right">Rp {{ number_format($detail->overtime_total, 0, ',', '.') }}</td>
-                        <td class="px-6 py-3 text-gray-700 text-right">Rp {{ number_format($detail->meal_allowance, 0, ',', '.') }}</td>
-                        <td class="px-6 py-3 text-red-600 text-right">- Rp {{ number_format($detail->pph21 + $detail->bpjs_tk + $detail->bpjs_kes, 0, ',', '.') }}</td>
+                        <td class="px-6 py-3 text-[#0a2219] font-bold text-right">Rp {{ number_format($detail->total_income, 0, ',', '.') }}</td>
+                        <td class="px-6 py-3 text-red-600 font-semibold text-right">- Rp {{ number_format($detail->total_deduction, 0, ',', '.') }}</td>
                         <td class="px-6 py-3 text-green-700 font-bold text-right">Rp {{ number_format($detail->net_salary, 0, ',', '.') }}</td>
                     </tr>
                 @empty

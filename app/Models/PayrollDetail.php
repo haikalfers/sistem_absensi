@@ -20,6 +20,7 @@ class PayrollDetail extends Model
         'bpjs_jkn_company',
         'jp_company_income',
         // Potongan
+        'bpjs_jht_company_deduct',
         'bpjs_jht_employee',
         'bpjs_jkk_deduct',
         'bpjs_jkm_deduct',
@@ -45,6 +46,7 @@ class PayrollDetail extends Model
         'bpjs_jkm_income'        => 'decimal:2',
         'bpjs_jkn_company'       => 'decimal:2',
         'jp_company_income'      => 'decimal:2',
+        'bpjs_jht_company_deduct'=> 'decimal:2',
         'bpjs_jht_employee'      => 'decimal:2',
         'bpjs_jkk_deduct'        => 'decimal:2',
         'bpjs_jkm_deduct'        => 'decimal:2',
@@ -92,7 +94,8 @@ class PayrollDetail extends Model
      */
     public function getTotalDeductionAttribute(): float
     {
-        return (float) $this->bpjs_jht_employee
+        return (float) $this->bpjs_jht_company_deduct
+            + (float) $this->bpjs_jht_employee
             + (float) $this->bpjs_jkk_deduct
             + (float) $this->bpjs_jkm_deduct
             + (float) $this->bpjs_jkn_company_deduct
