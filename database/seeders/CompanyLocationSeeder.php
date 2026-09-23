@@ -16,14 +16,14 @@ class CompanyLocationSeeder extends Seeder
 
         if ($isTestMode) {
             CompanyLocation::create([
-                'name'          => 'Kantor Pusat PT. Indobismar',
+                'name'          => 'Kantor PT. Indobismar',
                 'latitude'      => (float) env('OFFICE_LAT', -7.765944815767219),
                 'longitude'     => (float) env('OFFICE_LNG', 112.08732243244967),
                 'radius_meters' => (int) env('OFFICE_RADIUS', 50),
             ]);
         } else {
             CompanyLocation::create([
-                'name'          => 'Kantor Pusat PT. Indobismar',
+                'name'          => 'Kantor PT. Indobismar',
                 'latitude'      => (float) env('OFFICE_LAT', -7.3193),
                 'longitude'     => (float) env('OFFICE_LNG', 112.7483),
                 'radius_meters' => (int) env('OFFICE_RADIUS', 50),

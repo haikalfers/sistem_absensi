@@ -45,6 +45,27 @@ class SettingController extends Controller
     }
 
     /**
+     * Hapus lokasi kantor jika ada duplikasi/lebih dari 1
+     */
+    public function destroyLocation($id)
+    {
+        $locationsCount = CompanyLocation::count();
+        if ($locationsCount <= 1) {
+            return back()->withErrors(['error' => 'Tidak dapat menghapus kantor utama. Sistem membutuhkan minimal 1 lokasi acuan kantor.']);
+        }
+
+        try {
+            $location = CompanyLocation::findOrFail($id);
+            $name = $location->name;
+            $location->delete();
+
+            return back()->with('success', "Lokasi '{$name}' berhasil dihapus.");
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
      * View settings jadwal kerja
      */
     public function schedules()

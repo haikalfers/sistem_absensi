@@ -117,6 +117,7 @@ Route::middleware('auth')->group(function () {
         Route::prefix('settings')->name('settings.')->group(function () {
             Route::get('/locations', [Admin\SettingController::class, 'locations'])->name('locations');
             Route::post('/locations', [Admin\SettingController::class, 'updateLocations'])->name('locations.update');
+            Route::delete('/locations/{id}', [Admin\SettingController::class, 'destroyLocation'])->name('locations.destroy');
             Route::get('/schedules', [Admin\SettingController::class, 'schedules'])->name('schedules');
             Route::post('/schedules', [Admin\SettingController::class, 'updateSchedules'])->name('schedules.update');
             Route::post('/schedules/store', [Admin\SettingController::class, 'storeSchedule'])->name('schedules.store');
